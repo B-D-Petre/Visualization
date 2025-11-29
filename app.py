@@ -33,11 +33,15 @@ app.layout = html.Div(children=[
     html.Div(children = [
         #Sidebar
         html.Div(children = [
-            dcc.Tabs(id="sidebar_tabs", value="80s", children=[
+            dcc.Tabs(id="sidebar_tabs", value="20s", children=[
+                dcc.Tab(label="50s", value="50s"),
+                dcc.Tab(label="60s", value="60s"),
+                dcc.Tab(label="70s", value="70s"),
                 dcc.Tab(label="80s", value="80s"),
                 dcc.Tab(label="90s", value="90s"),
                 dcc.Tab(label="00s", value="00s"),
                 dcc.Tab(label="10s", value="10s"),
+                dcc.Tab(label="20s", value="20s"),
             ])
     ], 
              style={"background" : "#3D2C2C", "flexDirection" : "row"}), #Sidebar style
