@@ -67,12 +67,10 @@ app.layout = html.Div(children=[
 # Its a bit stupid
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
+    
+    # Here we will put a function that returns an html div with the figures as children
+    # each figure should intern be drawn by a function that takes the tab values as an arguments
     return f"You selected Topbar Tab: {topbar_tab_value} and Sidebar Tab: {sidebar_tab_value}"
-
-
-
-
-
 
 
 
