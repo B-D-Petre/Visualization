@@ -67,8 +67,8 @@ app.layout = html.Div(children=[
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
 )
-# If I remeber correctly the order of the parameters is the same as the order of the Inputs
-# Its a bit stupid
+# The order of the parameters is always the same as the order of the Inputs
+# Its a bit stupid so just keep that in mind if you add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
     

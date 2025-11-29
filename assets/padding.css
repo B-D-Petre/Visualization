@@ -1,7 +1,7 @@
 /* This file is to get rid of the scrollbar */
 
 body {
-    /* 1. Removes the default ~8px margin around the page edge.*/
+    /* 1. Removes the default margin around the page edge.*/
     margin: 0;
 
     /* 2. Removes default internal spacing. */
