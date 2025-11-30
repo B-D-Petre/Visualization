@@ -1,4 +1,31 @@
 from dash import Dash, html, dcc, Input, Output
+from figures import *
+
+ 
+# This function arranges the plots in an html layout
+def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
+    # Here we would have the logic to draw different content based on the selected tabs
+
+    if layout == "grid":
+        pane = html.Div(
+            style={
+                "padding": "30px",
+                "display": "grid",
+                "gridTemplateColumns": "1fr 1fr", #2 equal columns
+                "gridTemplateRows": "1fr 1fr", #2 equal rows
+                "gridGap": "30px",
+            },
+            children=[
+                html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"})
+                for i in range(4)
+            ],
+        )
+    else:
+        pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}"
+    return pane
+
+
+
 
 
 # Initialize the app
@@ -67,14 +94,12 @@ app.layout = html.Div(children=[
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
 )
+
 # The order of the parameters is always the same as the order of the Inputs
-# Its a bit stupid so just keep that in mind if you add more Inputs
+# just keep that in mind if you add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
-    
-    # Here we will put a function that returns an html div with the figures as children
-    # each figure should intern be drawn by a function that takes the tab values as an arguments
-    return f"You selected Topbar Tab: {topbar_tab_value} and Sidebar Tab: {sidebar_tab_value}"
+    return draw_pane(topbar_tab_value, sidebar_tab_value)
 
 
 
