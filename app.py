@@ -17,7 +17,7 @@ app = Dash(__name__)
 
 
 ## This class takes a list of children/components
-app.layout = html.Div(children=[
+app.layout = html.Div(id = "root_container", children=[
     
     #Topbar
     html.Div(children = [
@@ -60,6 +60,7 @@ app.layout = html.Div(children=[
 # Callback to update content area based on selected tab
 @app.callback(
     Output(component_id="content_area", component_property="children"),
+    Output(component_id="root_container", component_property="style"),
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
 )
