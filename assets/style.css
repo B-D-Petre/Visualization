@@ -1,0 +1,21 @@
+
+
+body {
+    /* This is to get rid of the scrollbar */
+    /* 1. Removes the default margin around the page edge.*/
+    margin: 0;
+
+    /* 2. Removes default internal spacing. */
+    padding: 0;
+
+    /* 3. The Layout Saver: Changes how size is calculated. 
+    now if we set something to 100vh any content inside will get squished instead of addede*/
+    box-sizing: border-box;
+
+
+    /* Add Background image */
+    background-image: url("/assets/80s.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
