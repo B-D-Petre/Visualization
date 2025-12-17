@@ -60,7 +60,7 @@ app.layout = html.Div(id = "root_container", children=[
     html.Div(children = [
         #Sidebar
         html.Div(children = [
-            dcc.Tabs(id="sidebar_tabs", value="20s", children=[
+            dcc.Tabs(id="sidebar_tabs", vertical = True, value="20s", children=[
                 dcc.Tab(label="50s", value="50s"),
                 dcc.Tab(label="60s", value="60s"),
                 dcc.Tab(label="70s", value="70s"),
@@ -100,7 +100,11 @@ app.layout = html.Div(id = "root_container", children=[
 # just keep that in mind if you add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
-    return draw_pane(topbar_tab_value, sidebar_tab_value)
+    #image_path = .... + sidebar_value
+    root_style = {"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw"} 
+                 #"background": image_path}
+    
+    return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
 
 
 
