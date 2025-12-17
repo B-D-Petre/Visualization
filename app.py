@@ -1,4 +1,31 @@
 from dash import Dash, html, dcc, Input, Output
+from figures import *
+
+ 
+# This function arranges the plots in an html layout
+def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
+    # Here we would have the logic to draw different content based on the selected tabs
+
+    if layout == "grid":
+        pane = html.Div(
+            style={
+                "padding": "30px",
+                "display": "grid",
+                "gridTemplateColumns": "1fr 1fr", #2 equal columns
+                "gridTemplateRows": "1fr 1fr", #2 equal rows
+                "gridGap": "30px",
+            },
+            children=[
+                html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"})
+                for i in range(4)
+            ],
+        )
+    else:
+        pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}"
+    return pane
+
+
+
 
 
 # Initialize the app
@@ -33,11 +60,15 @@ app.layout = html.Div(id = "root_container", children=[
     html.Div(children = [
         #Sidebar
         html.Div(children = [
-            dcc.Tabs(id="sidebar_tabs", value="80s", children=[
+            dcc.Tabs(id="sidebar_tabs", value="20s", children=[
+                dcc.Tab(label="50s", value="50s"),
+                dcc.Tab(label="60s", value="60s"),
+                dcc.Tab(label="70s", value="70s"),
                 dcc.Tab(label="80s", value="80s"),
                 dcc.Tab(label="90s", value="90s"),
                 dcc.Tab(label="00s", value="00s"),
                 dcc.Tab(label="10s", value="10s"),
+                dcc.Tab(label="20s", value="20s"),
             ])
     ], 
              style={"background" : "#3D2C2C", "flexDirection" : "row"}), #Sidebar style
@@ -64,16 +95,12 @@ app.layout = html.Div(id = "root_container", children=[
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
 )
-# If I remeber correctly the order of the parameters is the same as the order of the Inputs
-# Its a bit stupid
+
+# The order of the parameters is always the same as the order of the Inputs
+# just keep that in mind if you add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
-    return f"You selected Topbar Tab: {topbar_tab_value} and Sidebar Tab: {sidebar_tab_value}"
-
-
-
-
-
+    return draw_pane(topbar_tab_value, sidebar_tab_value)
 
 
 
