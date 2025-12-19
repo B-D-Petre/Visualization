@@ -6,23 +6,42 @@ from figures import *
 # This function arranges the plots in an html layout
 def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
     # Here we would have the logic to draw different content based on the selected tabs
-
-    if layout == "grid":
-        pane = html.Div(
-            style={
-                "padding": "30px",
-                "display": "grid",
-                "gridTemplateColumns": "1fr 1fr", #2 equal columns
-                "gridTemplateRows": "1fr 1fr", #2 equal rows
-                "gridGap": "30px",
-            },
-            children=[
-                html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"})
-                for i in range(4)
-            ],
-        )
+    if topbar_tab == "topic-3":
+        if layout == "grid":
+            pane = html.Div(
+                style={
+                    "padding": "30px",
+                    "display": "grid",
+                    "gridTemplateColumns": "1fr 1fr", #2 equal columns
+                    "gridTemplateRows": "1fr", #1 Row
+                },
+                children=[
+                    html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"}),
+                    html.Div("Play buttons placeholder", style={"background": "#ddd", "padding": "20px"})
+                ],
+            )
+        else:
+            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
+    
+    
     else:
-        pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}"
+        if layout == "grid":
+            pane = html.Div(
+                style={
+                    "padding": "30px",
+                    "display": "grid",
+                    "gridTemplateColumns": "1fr 1fr", #2 equal columns
+                    "gridTemplateRows": "1fr 1fr", #2 equal rows
+                    "gridGap": "30px",
+                },
+                children=[
+                    html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"})
+                    for i in range(4)
+                ],
+            )
+        else:
+            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
+    
     return pane
 
 
@@ -102,7 +121,7 @@ app.layout = html.Div(id = "root_container", children=[
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
 
-    #with os mudule
+    #This is for changing the background image depending on what decade is selected
     filename = sidebar_tab_value + ".png"
     root_style = {"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw", 
                   "backgroundImage": f"url('/assets/{filename}')"
