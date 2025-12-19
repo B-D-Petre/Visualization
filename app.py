@@ -50,9 +50,9 @@ app.layout = html.Div(id = "root_container", children=[
     #Topbar
     html.Div(children = [
         dcc.Tabs(id="topbar_tabs", value="topic-1", children=[
-            dcc.Tab(label="Home", value="topic-1"),
-            dcc.Tab(label="Compare", value="topic-2"),
-            dcc.Tab(label="Listen", value="topic-3"),
+            dcc.Tab(label="Analysis 1", value="topic-1"),
+            dcc.Tab(label="Analysis 2", value="topic-2"),
+            dcc.Tab(label="Compare/Listen", value="topic-3"),
         ])
     ], #TODO fix the dimensions of the tabs this can be done by disabeling mobile mode
              style={"background" : "#3D2C2C", "flexDirection" : "column"}), #careful height topbar depends on height of dcc.tabs
