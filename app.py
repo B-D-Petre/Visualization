@@ -1,4 +1,5 @@
 from dash import Dash, html, dcc, Input, Output
+import os
 from figures import *
 
  
@@ -44,7 +45,7 @@ app = Dash(__name__)
 
 
 ## This class takes a list of children/components
-app.layout = html.Div(children=[
+app.layout = html.Div(id = "root_container", children=[
     
     #Topbar
     html.Div(children = [
@@ -60,7 +61,7 @@ app.layout = html.Div(children=[
     html.Div(children = [
         #Sidebar
         html.Div(children = [
-            dcc.Tabs(id="sidebar_tabs", value="20s", children=[
+            dcc.Tabs(id="sidebar_tabs", vertical = True, value="20s", children=[
                 dcc.Tab(label="50s", value="50s"),
                 dcc.Tab(label="60s", value="60s"),
                 dcc.Tab(label="70s", value="70s"),
@@ -74,14 +75,14 @@ app.layout = html.Div(children=[
              style={"background" : "#3D2C2C", "flexDirection" : "row"}), #Sidebar style
         
         #Main content area
-        html.Div(id="content_area", children = "Here we will put the Main content area", style={"background" : "#5B5757", "flex" : "1"}) #Flex 1 to take up all remaining space,
+        html.Div(id="content_area", children = "Here we will put the Main content area", style={"flex" : "1"}) #Flex 1 to take up all remaining space,
     ],
     #Options
     style={"display" : "flex", "flexDirection" : "row", "flex" : "1" } #flex 1 take up all remaining space but will not overrule total size of root container
     ),
 
     #Bottom bar (Credits logos and so on)
-    html.Div("Here we will put the Bottom bar")
+    html.Div("Here we will put the Bottom bar", style = {"background" : "#5B5757"})
 ]
 #Options
 , style={"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw" } #currently takes 100% of avaialble viewport height This might be stupid
@@ -91,6 +92,7 @@ app.layout = html.Div(children=[
 # Callback to update content area based on selected tab
 @app.callback(
     Output(component_id="content_area", component_property="children"),
+    Output(component_id="root_container", component_property="style"),
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
 )
@@ -99,8 +101,14 @@ app.layout = html.Div(children=[
 # just keep that in mind if you add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value):
     # This function takes the Input value as an argument
-    return draw_pane(topbar_tab_value, sidebar_tab_value)
 
+    #with os mudule
+    filename = sidebar_tab_value + ".png"
+    root_style = {"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw", 
+                  "backgroundImage": f"url('/assets/{filename}')"
+                 }
+    
+    return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
 
 
 # Run the app
