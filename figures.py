@@ -50,17 +50,23 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
         name=song2
     ))
 
-    # Update layout
+    # Update layout with transparent background and larger plot
     fig.update_layout(
         polar=dict(
-            radialaxis=dict(visible=True, range=[0, 1])  # Normalized range
+            radialaxis=dict(visible=True, range=[0, 1]),  # Normalized range
+            bgcolor="rgba(0,0,0,0)"  # Transparent polar background
         ),
         showlegend=True,
-        title=f"Spider Graph for {song1} and {song2} ({sidebar_tab})"
+        title=f"Spider Graph for {song1} and {song2} ({sidebar_tab})",
+        paper_bgcolor="rgba(0,0,0,0)",  # Transparent canvas background
+        plot_bgcolor="rgba(0,0,0,0)",  # Transparent plot area
+        font=dict(color="white"),  # White text for visibility
+        height=600,  # Make graph taller
+        margin=dict(l=80, r=80, t=100, b=80)  # Larger margins for the plot
     )
 
-    # Return the figure as a Plotly HTML div
-    return dcc.Graph(figure=fig)
+    # Return the figure object directly
+    return fig
 
 def get_songs_for_decade(sidebar_tab):
     """Get unique song names for a given decade"""

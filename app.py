@@ -42,7 +42,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                     ),
                     html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
                     html.Div(
-                        draw_figure(topbar_tab, sidebar_tab),
+                        dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab)),
                         style={
                             "background": "rgba(0,0,0,0)",  # Transparent background for the graph container
                             "padding": "20px",
@@ -79,7 +79,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
 
 
 # Initialize the app
-app = Dash(__name__)
+app = Dash(__name__, suppress_callback_exceptions=True) #carefull for debugging we might need to remove this later
 
 # app.layout is the container for everything visual
 # Ill try to get the tabbed layout working
@@ -161,6 +161,19 @@ def render_content(topbar_tab_value, sidebar_tab_value):
                  }
     
     return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
+
+
+@app.callback(
+    Output(component_id="spider-graph", component_property="figure"),
+    Input(component_id="song-1-dropdown", component_property="value"),
+    Input(component_id="song-2-dropdown", component_property="value"),
+    Input(component_id="sidebar_tabs", component_property="value"),
+)
+def update_spider_graph(song1, song2, decade):
+    if song1 and song2:
+        figure = draw_spider(decade, song1, song2)
+        return figure
+    return {}
 
 
 # Run the app
