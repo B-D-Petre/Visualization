@@ -124,7 +124,10 @@ def render_content(topbar_tab_value, sidebar_tab_value):
     #This is for changing the background image depending on what decade is selected
     filename = sidebar_tab_value + ".png"
     root_style = {"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw", 
-                  "backgroundImage": f"url('/assets/{filename}')"
+                  "backgroundImage": f"url('/assets/{filename}')", 
+                  "background-size": "cover",
+                  "background-position": "center",
+                  "background-repeat": "no-repeat"
                  }
     
     return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
