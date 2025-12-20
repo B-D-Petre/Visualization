@@ -5,37 +5,47 @@ from figures import *
  
 # This function arranges the plots in an html layout
 def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
-    # Here we would have the logic to draw different content based on the selected tabs
     if topbar_tab == "topic-3":
         if layout == "grid":
             pane = html.Div(
                 style={
                     "padding": "30px",
                     "display": "grid",
-                    "gridTemplateColumns": "1fr 1fr", #2 equal columns
-                    "gridTemplateRows": "1fr", #1 Row
+                    "gridTemplateColumns": "3fr 1fr 3fr 1fr",  # Columns 1 and 3 are wider
+                    "gridTemplateRows": "1fr auto",  # First row is fixed, second row fills available space
+                    "gridGap": "30px",
+                    "background": "rgba(0,0,0,0)"  # Transparent background for the grid
                 },
                 children=[
-                    html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"}),
-                    html.Div("Play buttons placeholder", style={"background": "#ddd", "padding": "20px"})
+                    html.Div("select song 1", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
+                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
+                    html.Div("select song 2", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
+                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
+                    html.Div(
+                        draw_figure(topbar_tab, sidebar_tab),  # Pass the dcc.Graph object directly
+                        style={
+                            "background": "rgba(0,0,0,0)",  # Transparent background for the graph container
+                            "padding": "20px",
+                            "gridColumn": "1 / -1",  # Span across all columns in the second row
+                        },
+                    ),
                 ],
             )
         else:
             pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
-    
-    
     else:
         if layout == "grid":
             pane = html.Div(
                 style={
                     "padding": "30px",
                     "display": "grid",
-                    "gridTemplateColumns": "1fr 1fr", #2 equal columns
-                    "gridTemplateRows": "1fr 1fr", #2 equal rows
+                    "gridTemplateColumns": "1fr 1fr",  # 2 equal columns
+                    "gridTemplateRows": "1fr 1fr",  # 2 equal rows
                     "gridGap": "30px",
+                    "background": "rgba(0,0,0,0)"  # Transparent background for the grid
                 },
                 children=[
-                    html.Div(f"{draw_figure(topbar_tab, sidebar_tab)}", style={"background": "#ccc", "padding": "20px"})
+                    html.Div(draw_figure(topbar_tab, sidebar_tab), style={"background": "rgba(0,0,0,0)", "padding": "20px"})  # Transparent
                     for i in range(4)
                 ],
             )
