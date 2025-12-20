@@ -7,6 +7,10 @@ from figures import *
 def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
     if topbar_tab == "topic-3":
         if layout == "grid":
+            # Get available songs for the selected decade
+            available_songs = get_songs_for_decade(sidebar_tab)
+            song_options = [{"label": song, "value": song} for song in available_songs]
+            
             pane = html.Div(
                 style={
                     "padding": "30px",
@@ -17,12 +21,28 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                     "background": "rgba(0,0,0,0)"  # Transparent background for the grid
                 },
                 children=[
-                    html.Div("select song 1", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
-                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
-                    html.Div("select song 2", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
-                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),  # Transparent
                     html.Div(
-                        draw_figure(topbar_tab, sidebar_tab),  # Pass the dcc.Graph object directly
+                        dcc.Dropdown(
+                            id="song-1-dropdown",
+                            options=song_options,
+                            value=available_songs[0] if available_songs else None,
+                            style={"color": "black"}
+                        ),
+                        style={"background": "rgba(0,0,0,0)", "padding": "20px"}
+                    ),
+                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(
+                        dcc.Dropdown(
+                            id="song-2-dropdown",
+                            options=song_options,
+                            value=available_songs[1] if len(available_songs) > 1 else available_songs[0],
+                            style={"color": "black"}
+                        ),
+                        style={"background": "rgba(0,0,0,0)", "padding": "20px"}
+                    ),
+                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(
+                        draw_figure(topbar_tab, sidebar_tab),
                         style={
                             "background": "rgba(0,0,0,0)",  # Transparent background for the graph container
                             "padding": "20px",
