@@ -10,14 +10,14 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
         if layout == "grid":
             # Get available songs for the selected decade
             available_songs = get_songs_for_decade(sidebar_tab)
-            song_options = [{"label": song, "value": song} for song in available_songs]
+            song_options = [{"label": song_name, "value": track_id} for song_name, track_id in available_songs]
             
             pane = html.Div(
                 style={
                     "padding": "30px",
                     "display": "grid",
-                    "gridTemplateColumns": "3fr 1fr 3fr 1fr",  # Columns 1 and 3 are wider
-                    "gridTemplateRows": "1fr auto",  # First row is fixed, second row fills available space
+                    "gridTemplateColumns": "1fr  1fr",  # Columns 1 and 3 are wider
+                    "gridTemplateRows": "1fr 1fr auto",  # First row is fixed, second row fills available space
                     "gridGap": "30px",
                     "background": "rgba(0,0,0,0)"  # Transparent background for the grid
                 },
@@ -26,29 +26,44 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                         dcc.Dropdown(
                             id="song-1-dropdown",
                             options=song_options,
-                            value=available_songs[0] if available_songs else None,
+                            value=available_songs[0][1] if available_songs else None,
                             style={"color": "black"}
                         ),
                         style={"background": "rgba(0,0,0,0)", "padding": "20px"}
                     ),
                     html.Div(
-                        html.Button("▶", id="play-button-1", n_clicks=0, 
-                                    style={"fontSize": "24px", "padding": "10px 15px", "cursor": "pointer", "borderRadius": "50%"}),
-                        style={"background": "rgba(0,0,0,0)", "padding": "20px", "textAlign": "center"}
+                        html.Iframe(
+                        id="player-1",  # We need an ID to target this with a callback
+                        src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", # Initial song (some bruno mars bs)
+                        style={
+                            "height": "80px", # Spotify compact players look good at 80px or 152px
+                            "width": "100%", 
+                            "border": "0",    # Removes the ugly default border
+                            "borderRadius": "12px" # makes it look modern
+                            }
+                            )
+
                     ),
                     html.Div(
                         dcc.Dropdown(
                             id="song-2-dropdown",
                             options=song_options,
-                            value=available_songs[1] if len(available_songs) > 1 else available_songs[0],
+                            value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0],
                             style={"color": "black"}
                         ),
                         style={"background": "rgba(0,0,0,0)", "padding": "20px"}
                     ),
                     html.Div(
-                        html.Button("▶", id="play-button-2", n_clicks=0, 
-                                    style={"fontSize": "24px", "padding": "10px 15px", "cursor": "pointer", "borderRadius": "50%"}),
-                        style={"background": "rgba(0,0,0,0)", "padding": "20px", "textAlign": "center"}
+                        html.Iframe(
+                        id="player-2",  # We need an ID to target this with a callback
+                        src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", # Initial song (some bruno mars bs)
+                        style={
+                            "height": "80px", # Spotify compact players look good at 80px or 152px
+                            "width": "100%", 
+                            "border": "0",    # Removes the ugly default border
+                            "borderRadius": "12px" # makes it look modern
+                            }
+                            )
                     ),
                     html.Div(
                         dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab)),
@@ -146,7 +161,7 @@ app.layout = html.Div(id = "root_container", children=[
 , style={"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw" } #currently takes 100% of avaialble viewport height This might be stupid
 )
 
-
+#---------------------------------------------------------------------------#
 # Callback to update content area based on selected tab
 @app.callback(
     Output(component_id="content_area", component_property="children"),
@@ -171,7 +186,8 @@ def render_content(topbar_tab_value, sidebar_tab_value):
     
     return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
 
-
+#------------------------------------------------------------------------#
+# Listen/Spider Tab
 @app.callback(
     Output(component_id="spider-graph", component_property="figure"),
     Input(component_id="song-1-dropdown", component_property="value"),
@@ -184,33 +200,28 @@ def update_spider_graph(song1, song2, decade):
         return figure
     return {}
 
+@app.callback(
+    Output(component_id="player-1", component_property="src"),
+    Input(component_id="song-1-dropdown", component_property="value")
+)
+def update_player_1(track_id):
+    if not track_id:
+        return "" # Return empty if no song selected
+    
+    # Spotify embed structure: https://open.spotify.com/embed/track/{ID}
+    return f"https://open.spotify.com/embed/track/{track_id}"
 
 @app.callback(
-    Output(component_id="play-button-1", component_property="n_clicks"),
-    Input(component_id="play-button-1", component_property="n_clicks"),
-    State(component_id="song-1-dropdown", component_property="value"),
-    prevent_initial_call=True
+    Output(component_id="player-2", component_property="src"),
+    Input(component_id="song-2-dropdown", component_property="value")
 )
-def play_song_1(n_clicks, song1):
-    if n_clicks and n_clicks > 0 and song1:
-        # Appending "+song" to the query helps disambiguate
-        search_query = f"{song1} song" 
-        search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
-        webbrowser.open(search_url)
-    return 0
+def update_player_2(track_id):
+    if not track_id:
+        return "" # Return empty if no song selected
+    
+    # Spotify embed structure: https://open.spotify.com/embed/track/{ID}
+    return f"https://open.spotify.com/embed/track/{track_id}"
 
-@app.callback(
-    Output(component_id="play-button-2", component_property="n_clicks"),
-    Input(component_id="play-button-2", component_property="n_clicks"),
-    State(component_id="song-2-dropdown", component_property="value"),
-    prevent_initial_call=True
-)
-def play_song_2(n_clicks, song2):
-    if n_clicks and n_clicks > 0 and song2:
-        search_query = f"{song2} song"
-        search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
-        webbrowser.open(search_url)
-    return 0
 
 # Run the app
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ def draw_figure(topbar_tab, sidebar_tab):
 
 
 # Updated draw_spider to use actual data
-def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER"):
+def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfpdLNL5REhtJ"):
     # Define categories for the spider graph
     categories = ["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"]
 
@@ -28,8 +28,10 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
     filtered_data = spider_data[spider_data['decade'] == sidebar_tab]
 
     # Get values for the two songs
-    song1_values = filtered_data[filtered_data['track_name'] == song1][categories].values.flatten()
-    song2_values = filtered_data[filtered_data['track_name'] == song2][categories].values.flatten()
+    song1_values = filtered_data[filtered_data['track_id'] == song1][categories].values.flatten()
+    song1_name = filtered_data[filtered_data['track_id'] == song1]["track_name"].values.flatten().item()
+    song2_values = filtered_data[filtered_data['track_id'] == song2][categories].values.flatten()
+    song2_name = filtered_data[filtered_data['track_id'] == song2]["track_name"].values.flatten().item()
 
     # Create the spider graph
     fig = go.Figure()
@@ -39,7 +41,7 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
         r=song1_values,
         theta=categories,
         fill='toself',
-        name=song1
+        name=song1_name #use actual song name
     ))
 
     # Add song2 data
@@ -47,7 +49,7 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
         r=song2_values,
         theta=categories,
         fill='toself',
-        name=song2
+        name=song2_name
     ))
 
     # Update layout with transparent background and larger plot
@@ -57,7 +59,7 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
             bgcolor="rgba(0,0,0,0)"  # Transparent polar background
         ),
         showlegend=True,
-        title=f"Spider Graph for {song1} and {song2} ({sidebar_tab})",
+        title=f"Spider Graph for {song1_name} and {song2_name} ({sidebar_tab})",
         paper_bgcolor="rgba(0,0,0,0.5)",  # Transparent canvas background
         plot_bgcolor="rgba(0,0,0,0)",  # Transparent plot area
         font=dict(color="white"),  # White text for visibility
@@ -69,7 +71,9 @@ def draw_spider(sidebar_tab, song1="Die With A Smile", song2="BIRDS OF A FEATHER
     return fig
 
 def get_songs_for_decade(sidebar_tab):
-    """Get unique song names for a given decade"""
+    #Get unique song names and IDs for a given decade
     filtered_data = spider_data[spider_data['decade'] == sidebar_tab]
-    songs = filtered_data['track_name'].unique().tolist()
+    # 2. Use .values.tolist() to convert the DataFrame into a list of [name, id] pairs
+    songs = filtered_data[["track_name", "track_id"]].drop_duplicates().values.tolist()
+    
     return sorted(songs)
