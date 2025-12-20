@@ -1,5 +1,6 @@
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc, Input, Output, State
 import os
+import webbrowser
 from figures import *
 
  
@@ -30,7 +31,11 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                         ),
                         style={"background": "rgba(0,0,0,0)", "padding": "20px"}
                     ),
-                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(
+                        html.Button("▶", id="play-button-1", n_clicks=0, 
+                                    style={"fontSize": "24px", "padding": "10px 15px", "cursor": "pointer", "borderRadius": "50%"}),
+                        style={"background": "rgba(0,0,0,0)", "padding": "20px", "textAlign": "center"}
+                    ),
                     html.Div(
                         dcc.Dropdown(
                             id="song-2-dropdown",
@@ -40,7 +45,11 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                         ),
                         style={"background": "rgba(0,0,0,0)", "padding": "20px"}
                     ),
-                    html.Div("Play buttons placeholder", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(
+                        html.Button("▶", id="play-button-2", n_clicks=0, 
+                                    style={"fontSize": "24px", "padding": "10px 15px", "cursor": "pointer", "borderRadius": "50%"}),
+                        style={"background": "rgba(0,0,0,0)", "padding": "20px", "textAlign": "center"}
+                    ),
                     html.Div(
                         dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab)),
                         style={
@@ -175,6 +184,33 @@ def update_spider_graph(song1, song2, decade):
         return figure
     return {}
 
+
+@app.callback(
+    Output(component_id="play-button-1", component_property="n_clicks"),
+    Input(component_id="play-button-1", component_property="n_clicks"),
+    State(component_id="song-1-dropdown", component_property="value"),
+    prevent_initial_call=True
+)
+def play_song_1(n_clicks, song1):
+    if n_clicks and n_clicks > 0 and song1:
+        # Appending "+song" to the query helps disambiguate
+        search_query = f"{song1} song" 
+        search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
+        webbrowser.open(search_url)
+    return 0
+
+@app.callback(
+    Output(component_id="play-button-2", component_property="n_clicks"),
+    Input(component_id="play-button-2", component_property="n_clicks"),
+    State(component_id="song-2-dropdown", component_property="value"),
+    prevent_initial_call=True
+)
+def play_song_2(n_clicks, song2):
+    if n_clicks and n_clicks > 0 and song2:
+        search_query = f"{song2} song"
+        search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
+        webbrowser.open(search_url)
+    return 0
 
 # Run the app
 if __name__ == "__main__":
