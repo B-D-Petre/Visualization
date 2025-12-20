@@ -66,7 +66,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                             )
                     ),
                     html.Div(
-                        dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab)),
+                        dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab, song1=available_songs[0][1], song2=available_songs[1][1])),
                         style={
                             "background": "rgba(0,0,0,0)",  # Transparent background for the graph container
                             "padding": "20px",
