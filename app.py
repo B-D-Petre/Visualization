@@ -77,6 +77,26 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
             )
         else:
             pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
+    elif topbar_tab == "topic-4":
+        if layout == "grid":
+            pane = html.Div(
+                style={
+                    "padding": "30px",
+                    "display": "grid",
+                    "gridTemplateColumns": "1fr 1fr",
+                    "gridTemplateRows": "1fr 1fr",
+                    "gridGap": "30px",
+                    "background": "rgba(0,0,0,0)"
+                },
+                children=[
+                    html.Div(create_decade_card(sidebar_tab), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div("Future visualization", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                ],
+            )
+        else:
+            pane = f"Layout {layout} not implemented for topic-4"
     else:
         if layout == "grid":
             pane = html.Div(
@@ -126,6 +146,7 @@ app.layout = html.Div(id = "root_container", children=[
             dcc.Tab(label="Analysis 1", value="topic-1"),
             dcc.Tab(label="Analysis 2", value="topic-2"),
             dcc.Tab(label="Compare/Listen", value="topic-3"),
+            dcc.Tab(label="Changes", value="topic-4")
         ])
     ], #TODO fix the dimensions of the tabs this can be done by disabeling mobile mode
              style={"background" : "#3D2C2C", "flexDirection" : "column"}), #careful height topbar depends on height of dcc.tabs
@@ -225,4 +246,4 @@ def update_player_2(track_id):
 
 # Run the app
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port = 8052)

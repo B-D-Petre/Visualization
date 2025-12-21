@@ -1,10 +1,14 @@
 import plotly.graph_objects as go
-from dash import dcc
+from dash import dcc, html
 import pandas as pd
+import plotly.express as px
+
 
 # Load preprocessed spider graph data
 spider_csv_path = "assets/spider_graph_data.csv"
 spider_data = pd.read_csv(spider_csv_path)
+# Load Filip's data
+genre_counts = pd.read_csv('genre_counts_processed.csv')
 
 # This draws the actual plots 
 # it takes the selected topbar and produces the figure accordingly
@@ -25,6 +29,12 @@ def draw_figure(topbar_tab, sidebar_tab, song1=None, song2=None):
              # This is a safety measure
              figure = draw_spider(sidebar_tab) 
              
+    elif topbar_tab == "topic-4":  # Filip's changes tab
+        figure = html.Div([
+            dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "desc")),
+            dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "asc")),
+            create_decade_card(sidebar_tab)
+        ])
     else:
         placeholder_figure = f"This is where {topbar_tab} / {sidebar_tab} figure will be drawn"
         figure = placeholder_figure
@@ -101,3 +111,121 @@ def get_songs_for_decade(sidebar_tab):
     songs = filtered_data[["track_name", "track_id"]].drop_duplicates().values.tolist()
     
     return sorted(songs)
+#FILIPS PLOTS=============================================================================================D
+#paper esthetic
+PAPER_BG = '#f0e6d2'  # Old paper color
+INK_COLOR = '#2c2c2c' # Dark grey/black for text
+FONT_FAMILY = "Garamond, 'Helvetica', serif"
+
+# Custom visual theme function for Plotly
+def style_fig(fig):
+    fig.update_layout(
+        paper_bgcolor=PAPER_BG,
+        plot_bgcolor=PAPER_BG,
+        font=dict(family=FONT_FAMILY, color=INK_COLOR),
+        title_font=dict(size=20, family=FONT_FAMILY),
+        margin=dict(t=50, l=20, r=20, b=20)
+    )
+    return fig
+#my data
+genre_counts = pd.read_csv('genre_counts_processed.csv')
+DECADE_INFO = {
+    '50s': "The decade that gave birth to rock 'n' roll. Elvis Presley, Chuck Berry, and Little Richard electrified teenagers while their parents clutched their pearls. Doo-wop harmonies filled street corners, and the electric guitar became the sound of rebellion. Music wasn't just entertainment anymore: it was identity.",
+    
+    '60s': "The British Invasion landed when The Beatles conquered America, and nothing was ever the same. Motown gave us timeless soul, Dylan went electric and sparked outrage, and Woodstock became a generational moment. By decade's end, psychedelic rock had stretched what popular music could even be.",
+    
+    '70s': "A decade of extremes. Disco packed dance floors while punk burned them down. Led Zeppelin and Black Sabbath built the temple of heavy metal. Funk got political with Parliament and Sly Stone. The Walkman arrived in 1979, and suddenly music became portable and personal.",
+    
+    '80s': "Synthesizers and drum machines took over everything. MTV launched in 1981 and turned musicians into visual stars: Michael Jackson and Madonna ruled this new world. Hip-hop emerged from New York block parties to reshape popular culture. Hair metal, new wave, and synth-pop defined the excess.",
+    
+    '90s': "Nirvana's Nevermind killed hair metal overnight and grunge took over. Hip-hop went mainstream and split into coasts. Boy bands and Britney brought pop back. Napster arrived in 1999 and terrified the entire industry: file sharing was about to change everything.",
+    
+    '00s': "The digital revolution hit hard. The iPod and iTunes reshaped how we bought music while piracy ran rampant. Hip-hop dominated the charts. Emo and pop-punk gave angst a new voice. By decade's end, streaming was emerging and the album format was losing its grip.",
+    
+    '10s': "Streaming won. Spotify and Apple Music made everything available everywhere. EDM exploded into mainstream festivals. Latin pop went global with reggaeton and Despacito. SoundCloud launched careers. The lines between genres blurred as algorithms started shaping what we heard.",
+    
+    '20s': "TikTok became the new radio: 15 seconds can make a song explode or resurface a forgotten classic. Hyperpop pushed boundaries while bedroom producers competed with major labels. AI entered the conversation. Vinyl sales somehow keep climbing as listeners crave something physical again."
+}
+
+#plot for genre popularity changes-----------------
+def draw_change(decade, data, direction='desc'):#the parameter should be a column of changes in popularity in an aggregate dataframe, direction says whether to show positive or negative growth
+    delta = data[data['decade'] == decade]
+    top5 = delta.sort_values('change', ascending=False).head(5)
+    bottom5 = delta.sort_values('change', ascending=True).head(5)
+    if direction == "desc":
+        fig_change = px.bar(top5, x='playlist_genre',
+                               y = 'change',#for now in absolute numbers, should change to percent
+                               title='Biggest changes in genre popularity this decade',
+                               color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
+                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+    else:
+               fig_change = px.bar(bottom5, x='playlist_genre',
+                                   y = 'change',#for now in absolute numbers, should change to percent
+                                   title='Biggest changes in genre popularity this decade',
+                                   color=bottom5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
+                                   color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+        
+        
+                        
+    style_fig(fig_change)
+    return fig_change
+#DECADE CARD
+DECADE_COLORS = {
+    '60s': '#D35400', # Burnt Orange
+    '70s': '#8E44AD', # Purple
+    '80s': '#2980B9', # Blue
+    '90s': '#C0392B', # Red
+    '00s': '#27AE60', # Green
+    '10s': '#F1C40F', # Gold
+    '20s': '#1ABC9C'  # Teal
+}
+def create_decade_card(decade):
+    color = DECADE_COLORS.get(decade, '#333')
+    text = DECADE_INFO.get(decade, "Description unavailable.")
+    
+    return html.Div(style={
+        'fontFamily': "Garamond, 'Times New Roman', serif",
+        'backgroundColor': '#fff',
+        'border': '1px solid #ccc',
+        'boxShadow': '5px 5px 10px rgba(0,0,0,0.1)',
+        'maxWidth': '500px',
+        'margin': '20px auto'
+    }, children=[
+        
+        # A. The Colored Header (The "Tab")
+        html.Div(style={
+            'backgroundColor': color,
+            'height': '15px',
+            'width': '100%'
+        }),
+        
+        # B. The Content Window
+        html.Div(style={'padding': '25px'}, children=[
+            # Title
+            html.H2(f"The {decade}", style={
+                'marginTop': '0', 
+                'borderBottom': f'2px solid {color}',
+                'paddingBottom': '10px',
+                'color': '#2c2c2c'
+            }),
+            
+            # The Text Description
+            html.P(text, style={'fontSize': '1.2em', 'lineHeight': '1.5', 'color': '#333'}),
+            
+            # The Hallmark Image
+            html.Div(style={
+                'marginTop': '20px',
+                'display': 'flex',
+                'justifyContent': 'center',
+            }, children=[
+                html.Img(
+                    src=f'assets/imgs/{decade}.jpg',
+                    style={
+                        'maxWidth': '100%',
+                        'maxHeight': '250px',
+                        'objectFit': 'contain'
+                    }
+                )
+            ])
+        ])
+    ])
