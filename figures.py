@@ -16,27 +16,106 @@ genre_counts = pd.read_csv('genre_counts_processed.csv')
 # In figures.py
 
 # Update the signature to accept optional song arguments
-def draw_figure(topbar_tab, sidebar_tab, song1=None, song2=None):
+def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None):
+    decade_colors = {
+        '50s': 'red',
+        '60s': 'orange',
+        '70s': 'yellow',
+        '80s': 'green',
+        '90s': 'blue',
+        '00s': 'indigo',
+        '10s': 'violet',
+        '20s': 'purple'
+    }
     if topbar_tab == "topic-3":
         # Pass the songs down to draw_spider
         # If song1/song2 are None (which shouldn't happen with the fix above), 
         # draw_spider will use its defaults (which might still crash, but we fixed the input).
         
         if song1 and song2:
-             figure = draw_spider(sidebar_tab, song1, song2)
+             figure = draw_spider(current_decade, song1, song2)
         else:
              # Fallback if called without songs (e.g. initial load if logic is slightly off)
              # This is a safety measure
-             figure = draw_spider(sidebar_tab) 
+             figure = draw_spider(current_decade) 
              
+    elif topbar_tab == "topic-1":
+        # --- Analysis 1 Tab ---
+        categories = ["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"]
+        # Large spider graph for the decade average
+        fig = go.Figure()
+        for decade in decades_list:
+            filtered_data = spider_data[spider_data['decade'] == decade]
+            avg_values = [filtered_data[cat].mean() for cat in categories]
+            color = decade_colors.get(decade, 'grey')
+            fig.add_trace(go.Scatterpolar(
+                r=avg_values,
+                theta=categories,
+                fill='toself',
+                name=f"Average {decade}",
+                line=dict(color=color),
+                fillcolor=color
+            ))
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1]), bgcolor="rgba(0,0,0,0)"),
+            showlegend=True,
+            title=f"Average Audio Features",
+            paper_bgcolor="rgba(0,0,0,0.5)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white"),
+            height=700,
+            margin=dict(l=80, r=80, t=100, b=80)
+        )
+        # Area Plots for the right side (single column, 9 rows)
+        timeseries_features = ["Energy", "Tempo", "Danceability", "Loudness", "Liveness", "Valence", "Speechiness", "Acousticness", "Instrumentalness"]
+        available_features = [c for c in timeseries_features if c in spider_data.columns]
+        import plotly.subplots as sp
+        grid_rows, grid_cols = 9, 1  # 9 features in a single column
+        fig_area = sp.make_subplots(rows=grid_rows, cols=grid_cols, subplot_titles=available_features, vertical_spacing=0.05)
+        for decade in decades_list:
+            norm_df = spider_data[spider_data['decade'] == decade].copy()
+            # Normalize each feature (0-1)
+            for feature in available_features:
+                col = norm_df[feature]
+                if col.max() != col.min():
+                    norm_df[feature] = (col - col.min()) / (col.max() - col.min())
+                else:
+                    norm_df[feature] = 0
+            # Use 'track_album_release_date' if available, else fallback to index
+            x_axis = None
+            if 'track_album_release_date' in norm_df.columns:
+                x_axis = 'track_album_release_date'
+            elif 'year' in norm_df.columns:
+                x_axis = 'year'
+            else:
+                norm_df['index'] = norm_df.index
+                x_axis = 'index'
+            for i, feature in enumerate(available_features):
+                row = i + 1
+                col = 1
+                ts = norm_df.copy()
+                if x_axis == 'track_album_release_date' and not pd.api.types.is_datetime64_any_dtype(ts[x_axis]):
+                    ts[x_axis] = pd.to_datetime(ts[x_axis], errors='coerce')
+                ts = ts.sort_values(x_axis)
+                color = decade_colors.get(decade, 'grey')
+                fig_area.add_trace(
+                    go.Scatter(x=ts[x_axis], y=ts[feature], fill='tozeroy', mode='lines', name=f"{feature} {decade}", line=dict(color=color), fillcolor=color),
+                    row=row, col=col
+                )
+        fig_area.update_layout(height=1000, width=600, showlegend=False, title_text="Area Plots of Normalized Audio Features", margin=dict(t=50, b=50, l=50, r=50))
+        # Compose the layout: spider graph left, area plots right
+        figure = html.Div(style={"display": "flex", "flexDirection": "row", "width": "100%"}, children=[
+            html.Div(dcc.Graph(figure=fig), style={"flex": "1", "padding": "20px"}),
+            html.Div(dcc.Graph(figure=fig_area), style={"flex": "1", "padding": "20px"})
+        ])
     elif topbar_tab == "topic-4":  # Filip's changes tab
         figure = html.Div([
-            dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "desc")),
-            dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "asc")),
-            create_decade_card(sidebar_tab)
+            dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")),
+            dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")),
+            create_decade_card(current_decade)
         ])
     else:
-        placeholder_figure = f"This is where {topbar_tab} / {sidebar_tab} figure will be drawn"
+        placeholder_figure = f"This is where {topbar_tab} / {current_decade} figure will be drawn"
         figure = placeholder_figure
 
     return figure

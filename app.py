@@ -5,11 +5,13 @@ from figures import *
 
  
 # This function arranges the plots in an html layout
-def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
-    if topbar_tab == "topic-3":
+def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
+    if topbar_tab == "topic-1":
+        pane = draw_figure(topbar_tab, decades_list, current_decade)
+    elif topbar_tab == "topic-3":
         if layout == "grid":
             # Get available songs for the selected decade
-            available_songs = get_songs_for_decade(sidebar_tab)
+            available_songs = get_songs_for_decade(current_decade)
             song_options = [{"label": song_name, "value": track_id} for song_name, track_id in available_songs]
             
             pane = html.Div(
@@ -48,7 +50,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                         dcc.Dropdown(
                             id="song-2-dropdown",
                             options=song_options,
-                            value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0],
+                            value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0][1],
                             style={"color": "black"}
                         ),
                         style={"background": "rgba(0,0,0,0)", "padding": "20px"}
@@ -66,7 +68,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                             )
                     ),
                     html.Div(
-                        dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, sidebar_tab, song1=available_songs[0][1], song2=available_songs[1][1])),
+                        dcc.Graph(id="spider-graph", figure=draw_figure(topbar_tab, decades_list, current_decade, song1=available_songs[0][1], song2=available_songs[1][1])),
                         style={
                             "background": "rgba(0,0,0,0)",  # Transparent background for the graph container
                             "padding": "20px",
@@ -76,7 +78,7 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                 ],
             )
         else:
-            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
+            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {current_decade}, The layout you specified ({layout}) is not yet implemented"
     elif topbar_tab == "topic-4":
         if layout == "grid":
             pane = html.Div(
@@ -89,10 +91,10 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                     "background": "rgba(0,0,0,0)"
                 },
                 children=[
-                    html.Div(create_decade_card(sidebar_tab), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(create_decade_card(current_decade), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
                     html.Div("Future visualization", style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
-                    html.Div(dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
-                    html.Div(dcc.Graph(figure=draw_change(sidebar_tab, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "20px"}),
                 ],
             )
         else:
@@ -109,12 +111,12 @@ def draw_pane(topbar_tab, sidebar_tab, layout="grid"):
                     "background": "rgba(0,0,0,0)"  # Transparent background for the grid
                 },
                 children=[
-                    html.Div(draw_figure(topbar_tab, sidebar_tab), style={"background": "rgba(0,0,0,0)", "padding": "20px"})  # Transparent
+                    html.Div(draw_figure(topbar_tab, decades_list, current_decade), style={"background": "rgba(0,0,0,0)", "padding": "20px"})  # Transparent
                     for i in range(4)
                 ],
             )
         else:
-            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {sidebar_tab}, The layout you specified ({layout}) is not yet implemented"
+            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {current_decade}, The layout you specified ({layout}) is not yet implemented"
     
     return pane
 
@@ -151,6 +153,8 @@ app.layout = html.Div(id = "root_container", children=[
     ], #TODO fix the dimensions of the tabs this can be done by disabeling mobile mode
              style={"background" : "#3D2C2C", "flexDirection" : "column"}), #careful height topbar depends on height of dcc.tabs
 
+    dcc.Store(id='selected_decades', data=[]),
+
     # Horizontal Pane
     html.Div(children = [
         #Sidebar
@@ -166,7 +170,7 @@ app.layout = html.Div(id = "root_container", children=[
                 dcc.Tab(label="20s", value="20s"),
             ])
     ], 
-             style={"background" : "#3D2C2C", "flexDirection" : "row"}), #Sidebar style
+             style={"background" : "#3D2C2C", "height": "100vh"}), #Sidebar style
         
         #Main content area
         html.Div(id="content_area", children = "Here we will put the Main content area", style={"flex" : "1"}) #Flex 1 to take up all remaining space,
@@ -187,14 +191,20 @@ app.layout = html.Div(id = "root_container", children=[
 @app.callback(
     Output(component_id="content_area", component_property="children"),
     Output(component_id="root_container", component_property="style"),
+    Output(component_id="selected_decades", component_property="data"),
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
+    State(component_id="selected_decades", component_property="data"),
 )
 
 # The order of the parameters is always the same as the order of the Inputs
 # just keep that in mind if you add more Inputs
-def render_content(topbar_tab_value, sidebar_tab_value):
+def render_content(topbar_tab_value, sidebar_tab_value, selected_decades):
     # This function takes the Input value as an argument
+
+    selected_decades = selected_decades or []
+    if sidebar_tab_value not in selected_decades:
+        selected_decades.append(sidebar_tab_value)
 
     #This is for changing the background image depending on what decade is selected
     filename = sidebar_tab_value + ".png"
@@ -205,7 +215,7 @@ def render_content(topbar_tab_value, sidebar_tab_value):
                   "background-repeat": "no-repeat"
                  }
     
-    return draw_pane(topbar_tab_value, sidebar_tab_value), root_style
+    return draw_pane(topbar_tab_value, selected_decades, sidebar_tab_value), root_style, selected_decades
 
 #------------------------------------------------------------------------#
 # Listen/Spider Tab
@@ -242,7 +252,6 @@ def update_player_2(track_id):
     
     # Spotify embed structure: https://open.spotify.com/embed/track/{ID}
     return f"https://open.spotify.com/embed/track/{track_id}"
-
 
 # Run the app
 if __name__ == "__main__":
