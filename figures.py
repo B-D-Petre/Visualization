@@ -117,7 +117,7 @@ def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceabil
     import plotly.subplots as sp
     grid_rows = len(available_features)
     grid_cols = 1
-    fig_area = sp.make_subplots(rows=grid_rows, cols=grid_cols, subplot_titles=available_features, vertical_spacing=0.05)
+    fig_area = sp.make_subplots(rows=grid_rows, cols=grid_cols, subplot_titles=available_features, vertical_spacing=0.08)
     for decade in decades_list:
         norm_df = spider_data[spider_data['decade'] == decade].copy()
         for feature in available_features:
@@ -146,8 +146,75 @@ def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceabil
                 go.Scatter(x=ts[x_axis], y=ts[feature], fill='tozeroy', mode='lines', name=f"{feature} {decade}", line=dict(color=color), fillcolor=color),
                 row=row, col=col
             )
-    fig_area.update_layout(height=None, width=None, showlegend=False, title_text="Area Plots of Normalized Audio Features", autosize=True, margin=dict(t=50, b=50, l=50, r=50))
+    fig_area.update_layout(height=None, width=None, showlegend=False, title_text="Area Plots of Normalized Audio Features", autosize=True, margin=dict(t=30, b=30, l=30, r=30), title_font=dict(size=12))
     return fig_area
+
+
+# New function for timeline
+def draw_timeline(decade):
+    filtered_data = spider_data[spider_data['decade'] == decade]
+    
+    if 'track_album_release_date' in filtered_data.columns:
+        dates = pd.to_datetime(filtered_data['track_album_release_date'], errors='coerce').dropna()
+    else:
+        dates = pd.Series()  # empty
+    
+    if dates.empty:
+        # fallback
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=[], y=[]))
+        fig.update_layout(
+            xaxis=dict(title="Time Bins", tickfont=dict(color='white')),
+            yaxis=dict(title="Number of Songs", tickfont=dict(color='white')),
+            height=200,
+            autosize=True,
+            margin=dict(t=10, b=40, l=40, r=20),
+            paper_bgcolor="rgba(0,0,0,0.5)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white")
+        )
+        return fig
+    
+    min_date = dates.min()
+    max_date = dates.max()
+    
+    # Create bins every 5 months
+    bins = pd.date_range(start=min_date, end=max_date + pd.DateOffset(months=5), freq='5MS')
+    
+    if len(bins) < 2:
+        bins = pd.date_range(start=min_date, periods=2, freq='5MS')
+    
+    # Bin the dates
+    binned = pd.cut(dates, bins=bins, right=False, labels=[f"{b.strftime('%Y-%m')}-{ (b + pd.DateOffset(months=5) - pd.DateOffset(days=1)).strftime('%Y-%m')}" for b in bins[:-1]])
+    
+    # Count per bin
+    counts = binned.value_counts().sort_index()
+    
+    # For plotting, x as the bin labels, y as counts
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=counts.index,
+        y=counts.values,
+        marker_color='white'
+    ))
+    
+    fig.update_layout(
+        xaxis=dict(
+            title="5-Month Bins",
+            tickfont=dict(color='white')
+        ),
+        yaxis=dict(
+            title="Number of Songs",
+            tickfont=dict(color='white')
+        ),
+        height=200,  # adjust height for better visibility
+        autosize=True,
+        margin=dict(t=10, b=40, l=40, r=20),
+        paper_bgcolor="rgba(0,0,0,0.5)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white")
+    )
+    return fig
 
 
 # Updated draw_spider to use actual data

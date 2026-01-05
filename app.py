@@ -107,18 +107,21 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
             
             pane = html.Div(
                 style={
-                    "padding": "10px",
+                    "padding": "6px",
                     "display": "grid",
                     "gridTemplateColumns": "1fr 1fr 1fr",
-                    "gridTemplateRows": "1fr 1fr 1fr",
-                    "gridGap": "10px",
+                    "gridTemplateRows": "1fr auto 1fr 1fr",
+                    "gridGap": "6px",
                     "background": "rgba(0,0,0,0)"
                 },
                 children=[
                     # Row 1
-                    html.Div(dcc.Graph(figure=draw_spider_analysis1(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
-                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
-                    html.Div(style={"backgroundColor": "black"}),
+                    html.Div(dcc.Graph(figure=draw_spider_analysis1(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade, features=["Energy", "Danceability", "Valence", "Acousticness"])), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade, features=["Instrumentalness", "Loudness", "Tempo", "Liveness"])), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    
+                    # Timeline
+                    html.Div(dcc.Graph(figure=draw_timeline(current_decade)), style={"gridColumn": "1 / -1", "minWidth": "0"}),
                     
                     # Row 2
                     html.Div([
@@ -134,7 +137,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
                             value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0][1],
                             style={"color": "black"}
                         )
-                    ], style={"background": "rgba(0,0,0,0)", "padding": "5px", "display": "flex", "flexDirection": "column"}),
+                    ], style={"background": "rgba(0,0,0,0)", "padding": "3px", "display": "flex", "flexDirection": "column", "minWidth": "0"}),
                     html.Div([
                         html.Iframe(
                             id="player-1",
@@ -157,13 +160,13 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
                                 "borderRadius": "12px"
                             }
                         )
-                    ], style={"background": "rgba(0,0,0,0)", "padding": "5px", "display": "flex", "flexDirection": "column"}),
-                    html.Div(dcc.Graph(id="spider-graph", figure=draw_spider(current_decade, available_songs[0][1] if available_songs else None, available_songs[1][1] if len(available_songs) > 1 else None)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    ], style={"background": "rgba(0,0,0,0)", "padding": "3px", "display": "flex", "flexDirection": "column", "minWidth": "0"}),
+                    html.Div(dcc.Graph(id="spider-graph", figure=draw_spider(current_decade, available_songs[0][1] if available_songs else None, available_songs[1][1] if len(available_songs) > 1 else None)), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
                     
                     # Row 3
-                    html.Div(create_decade_card(current_decade), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
-                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
-                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "5px"})
+                    html.Div(create_decade_card(current_decade), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"})
                 ]
             )
         else:
