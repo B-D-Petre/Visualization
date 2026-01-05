@@ -99,6 +99,75 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
             )
         else:
             pane = f"Layout {layout} not implemented for topic-4"
+    elif topbar_tab == "topic-5":
+        if layout == "grid":
+            # Get available songs for the selected decade
+            available_songs = get_songs_for_decade(current_decade)
+            song_options = [{"label": song_name, "value": track_id} for song_name, track_id in available_songs]
+            
+            pane = html.Div(
+                style={
+                    "padding": "10px",
+                    "display": "grid",
+                    "gridTemplateColumns": "1fr 1fr 1fr",
+                    "gridTemplateRows": "1fr 1fr 1fr",
+                    "gridGap": "10px",
+                    "background": "rgba(0,0,0,0)"
+                },
+                children=[
+                    # Row 1
+                    html.Div(dcc.Graph(figure=draw_spider_analysis1(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    html.Div(style={"backgroundColor": "black"}),
+                    
+                    # Row 2
+                    html.Div([
+                        dcc.Dropdown(
+                            id="song-1-dropdown",
+                            options=song_options,
+                            value=available_songs[0][1] if available_songs else None,
+                            style={"color": "black", "marginBottom": "10px"}
+                        ),
+                        dcc.Dropdown(
+                            id="song-2-dropdown",
+                            options=song_options,
+                            value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0][1],
+                            style={"color": "black"}
+                        )
+                    ], style={"background": "rgba(0,0,0,0)", "padding": "5px", "display": "flex", "flexDirection": "column"}),
+                    html.Div([
+                        html.Iframe(
+                            id="player-1",
+                            src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe",
+                            style={
+                                "height": "80px",
+                                "width": "100%", 
+                                "border": "0",
+                                "borderRadius": "12px",
+                                "marginBottom": "10px"
+                            }
+                        ),
+                        html.Iframe(
+                            id="player-2",
+                            src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe",
+                            style={
+                                "height": "80px",
+                                "width": "100%", 
+                                "border": "0",
+                                "borderRadius": "12px"
+                            }
+                        )
+                    ], style={"background": "rgba(0,0,0,0)", "padding": "5px", "display": "flex", "flexDirection": "column"}),
+                    html.Div(dcc.Graph(id="spider-graph", figure=draw_spider(current_decade, available_songs[0][1] if available_songs else None, available_songs[1][1] if len(available_songs) > 1 else None)), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    
+                    # Row 3
+                    html.Div(create_decade_card(current_decade), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "5px"}),
+                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "5px"})
+                ]
+            )
+        else:
+            pane = f"You have selected Topbar Tab: {topbar_tab} and Sidebar Tab: {current_decade}, The layout you specified ({layout}) is not yet implemented"
     else:
         if layout == "grid":
             pane = html.Div(
@@ -148,7 +217,8 @@ app.layout = html.Div(id = "root_container", children=[
             dcc.Tab(label="Analysis 1", value="topic-1"),
             dcc.Tab(label="Analysis 2", value="topic-2"),
             dcc.Tab(label="Compare/Listen", value="topic-3"),
-            dcc.Tab(label="Changes", value="topic-4")
+            dcc.Tab(label="Changes", value="topic-4"),
+            dcc.Tab(label="Prototype Dashboard", value="topic-5")
         ])
     ], #TODO fix the dimensions of the tabs this can be done by disabeling mobile mode
              style={"background" : "#3D2C2C", "flexDirection" : "column"}), #careful height topbar depends on height of dcc.tabs
