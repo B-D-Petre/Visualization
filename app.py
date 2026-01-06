@@ -5,7 +5,7 @@ from figures import *
 
  
 # This function arranges the plots in an html layout
-def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
+def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months"):
     if topbar_tab == "topic-1":
         pane = draw_figure(topbar_tab, decades_list, current_decade)
     elif topbar_tab == "topic-3":
@@ -110,18 +110,43 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
                     "padding": "6px",
                     "display": "grid",
                     "gridTemplateColumns": "1fr 1fr 1fr",
-                    "gridTemplateRows": "1fr auto 1fr 1fr",
+                    "gridTemplateRows": "1fr auto auto 1fr 1fr",
                     "gridGap": "6px",
                     "background": "rgba(0,0,0,0)"
                 },
                 children=[
                     # Row 1
                     html.Div(dcc.Graph(figure=draw_spider_analysis1(decades_list, current_decade)), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
-                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade, features=["Energy", "Danceability", "Valence", "Acousticness"])), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
-                    html.Div(dcc.Graph(figure=draw_area_plots(decades_list, current_decade, features=["Instrumentalness", "Loudness", "Tempo", "Liveness"])), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(dcc.Graph(id='area-plots-graph', figure=draw_area_plots(decades_list, current_decade, features=["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness", "Loudness", "Tempo", "Liveness"])), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(
+                        style={"display": "flex", "flexDirection": "column", "height": "100%"},
+                        children=[
+                            html.Div(create_decade_card(current_decade), style={"flex": "2", "background": "rgba(0,0,0,0)", "padding": "3px"}),
+                            html.Div(
+                                style={"flex": "1", "display": "flex", "flexDirection": "row"},
+                                children=[
+                                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"flex": "1", "background": "rgba(0,0,0,0)", "padding": "3px"}),
+                                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"flex": "1", "background": "rgba(0,0,0,0)", "padding": "3px"})
+                                ]
+                            )
+                        ]
+                    ),
                     
                     # Timeline
-                    html.Div(dcc.Graph(figure=draw_timeline(current_decade)), style={"gridColumn": "1 / -1", "minWidth": "0"}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id="bin-size-dropdown",
+                            options=[
+                                {"label": "No bins", "value": "No bins"},
+                                {"label": "1 week", "value": "1 week"},
+                                {"label": "1 month", "value": "1 month"},
+                                {"label": "5 months", "value": "5 months"}
+                            ],
+                            value=bin_size,
+                            style={"position": "absolute", "top": "10px", "left": "10px", "zIndex": "10", "color": "black", "width": "150px"}
+                        ),
+                        dcc.Graph(id="timeline-graph", figure=draw_timeline(current_decade, bin_size))
+                    ], style={"gridColumn": "1 / 4", "minWidth": "0", "position": "relative"}),
                     
                     # Row 2
                     html.Div([
@@ -164,9 +189,9 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid"):
                     html.Div(dcc.Graph(id="spider-graph", figure=draw_spider(current_decade, available_songs[0][1] if available_songs else None, available_songs[1][1] if len(available_songs) > 1 else None)), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
                     
                     # Row 3
-                    html.Div(create_decade_card(current_decade), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
-                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "asc")), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
-                    html.Div(dcc.Graph(figure=draw_change(current_decade, genre_counts, "desc")), style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"})
+                    html.Div(style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"}),
+                    html.Div(style={"background": "rgba(0,0,0,0)", "padding": "3px", "minWidth": "0"})
                 ]
             )
         else:
@@ -227,6 +252,9 @@ app.layout = html.Div(id = "root_container", children=[
              style={"background" : "#3D2C2C", "flexDirection" : "column"}), #careful height topbar depends on height of dcc.tabs
 
     dcc.Store(id='selected_decades', data=[]),
+    dcc.Store(id='bin_size', data='5 months'),
+    dcc.Store(id='previous_decade', data=None),
+    dcc.Store(id='animation_trigger', data=0),
 
     # Horizontal Pane
     html.Div(children = [
@@ -265,19 +293,30 @@ app.layout = html.Div(id = "root_container", children=[
     Output(component_id="content_area", component_property="children"),
     Output(component_id="root_container", component_property="style"),
     Output(component_id="selected_decades", component_property="data"),
+    Output(component_id="previous_decade", component_property="data"),
+    Output(component_id="animation_trigger", component_property="data"),
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
     State(component_id="selected_decades", component_property="data"),
+    State(component_id="bin_size", component_property="data"),
+    State(component_id="previous_decade", component_property="data"),
+    State(component_id="animation_trigger", component_property="data"),
+    allow_duplicate=True
 )
 
 # The order of the parameters is always the same as the order of the Inputs
 # just keep that in mind if you add more Inputs
-def render_content(topbar_tab_value, sidebar_tab_value, selected_decades):
+def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_size, previous_decade, animation_trigger):
     # This function takes the Input value as an argument
 
     selected_decades = selected_decades or []
     if sidebar_tab_value not in selected_decades:
         selected_decades.append(sidebar_tab_value)
+
+    # Check if decade changed
+    decade_changed = sidebar_tab_value != previous_decade
+    if decade_changed:
+        animation_trigger = (animation_trigger or 0) + 1
 
     #This is for changing the background image depending on what decade is selected
     filename = sidebar_tab_value + ".png"
@@ -288,7 +327,7 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades):
                   "background-repeat": "no-repeat"
                  }
     
-    return draw_pane(topbar_tab_value, selected_decades, sidebar_tab_value), root_style, selected_decades
+    return draw_pane(topbar_tab_value, selected_decades, sidebar_tab_value, bin_size=bin_size), root_style, selected_decades, sidebar_tab_value, animation_trigger
 
 #------------------------------------------------------------------------#
 # Listen/Spider Tab
@@ -296,7 +335,7 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades):
     Output(component_id="spider-graph", component_property="figure"),
     Input(component_id="song-1-dropdown", component_property="value"),
     Input(component_id="song-2-dropdown", component_property="value"),
-    Input(component_id="sidebar_tabs", component_property="value"),
+    State(component_id="sidebar_tabs", component_property="value"),
 )
 def update_spider_graph(song1, song2, decade):
     if song1 and song2:
@@ -325,6 +364,34 @@ def update_player_2(track_id):
     
     # Spotify embed structure: https://open.spotify.com/embed/track/{ID}
     return f"https://open.spotify.com/embed/track/{track_id}"
+
+# Callback for timeline
+@app.callback(
+    Output("timeline-graph", "figure"),
+    Input("bin-size-dropdown", "value"),
+    Input("sidebar_tabs", "value"),
+)
+def update_timeline(bin_size, decade):
+    return draw_timeline(decade, bin_size)
+
+# Callback for bin size
+@app.callback(
+    Output("bin_size", "data"),
+    Input("bin-size-dropdown", "value")
+)
+def update_bin_size(value):
+    return value
+
+# Callback for area plots (sync bin size with timeline dropdown)
+@app.callback(
+    Output('area-plots-graph', 'figure'),
+    Input('bin-size-dropdown', 'value'),  # <-- Use bin-size-dropdown directly for binning
+    Input('sidebar_tabs', 'value'),
+    State('selected_decades', 'data')
+)
+def update_area_opacity(bin_size, decade, selected_decades):
+    figure = draw_area_plots(selected_decades, decade, features=["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness", "Loudness", "Tempo", "Liveness"], bin_size=bin_size)
+    return figure
 
 # Run the app
 if __name__ == "__main__":

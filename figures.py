@@ -27,6 +27,16 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
         '10s': 'violet',
         '20s': 'purple'
     }
+    decade_rgb = {
+        '50s': (255, 0, 0),
+        '60s': (255, 165, 0),
+        '70s': (255, 255, 0),
+        '80s': (0, 128, 0),
+        '90s': (0, 0, 255),
+        '00s': (75, 0, 130),
+        '10s': (238, 130, 238),
+        '20s': (128, 0, 128)
+    }
     if topbar_tab == "topic-3":
         # Pass the songs down to draw_spider
         # If song1/song2 are None (which shouldn't happen with the fix above), 
@@ -102,7 +112,7 @@ def draw_spider_analysis1(decades_list, current_decade):
     )
     return fig
 
-def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"]):
+def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"], opacity=1.0, bin_size=None):
     decade_colors = {
         '50s': 'red',
         '60s': 'orange',
@@ -112,6 +122,16 @@ def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceabil
         '00s': 'indigo',
         '10s': 'violet',
         '20s': 'purple'
+    }
+    decade_rgb = {
+        '50s': (255, 0, 0),
+        '60s': (255, 165, 0),
+        '70s': (255, 255, 0),
+        '80s': (0, 128, 0),
+        '90s': (0, 0, 255),
+        '00s': (75, 0, 130),
+        '10s': (238, 130, 238),
+        '20s': (128, 0, 128)
     }
     available_features = [c for c in features if c in spider_data.columns]
     import plotly.subplots as sp
@@ -126,14 +146,36 @@ def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceabil
                 norm_df[feature] = (col - col.min()) / (col.max() - col.min())
             else:
                 norm_df[feature] = 0
-        x_axis = None
-        if 'track_album_release_date' in norm_df.columns:
-            x_axis = 'track_album_release_date'
-        elif 'year' in norm_df.columns:
-            x_axis = 'year'
+        # Bin logic
+        if bin_size and bin_size != "No bins":
+            if 'track_album_release_date' in norm_df.columns:
+                norm_df['track_album_release_date'] = pd.to_datetime(norm_df['track_album_release_date'], errors='coerce')
+                if bin_size == "1 week":
+                    freq = 'W'
+                elif bin_size == "1 month":
+                    freq = 'MS'
+                elif bin_size == "5 months":
+                    freq = '5MS'
+                else:
+                    freq = 'YS'
+                norm_df = norm_df.set_index('track_album_release_date')
+                # Only aggregate numeric columns to avoid TypeError
+                numeric_cols = norm_df.select_dtypes(include='number').columns
+                norm_df = norm_df.groupby(pd.Grouper(freq=freq))[numeric_cols].mean().reset_index()
+                x_axis = 'track_album_release_date'
+            elif 'year' in norm_df.columns:
+                x_axis = 'year'
+            else:
+                norm_df['index'] = norm_df.index
+                x_axis = 'index'
         else:
-            norm_df['index'] = norm_df.index
-            x_axis = 'index'
+            if 'track_album_release_date' in norm_df.columns:
+                x_axis = 'track_album_release_date'
+            elif 'year' in norm_df.columns:
+                x_axis = 'year'
+            else:
+                norm_df['index'] = norm_df.index
+                x_axis = 'index'
         for i, feature in enumerate(available_features):
             row = i + 1
             col = 1
@@ -141,17 +183,42 @@ def draw_area_plots(decades_list, current_decade, features=["Energy", "Danceabil
             if x_axis == 'track_album_release_date' and not pd.api.types.is_datetime64_any_dtype(ts[x_axis]):
                 ts[x_axis] = pd.to_datetime(ts[x_axis], errors='coerce')
             ts = ts.sort_values(x_axis)
-            color = decade_colors.get(decade, 'grey')
+            color_rgb = decade_rgb.get(decade, (128, 128, 128))
+            line_color = f'rgba({color_rgb[0]}, {color_rgb[1]}, {color_rgb[2]}, {opacity})'
+            fill_color = f'rgba({color_rgb[0]}, {color_rgb[1]}, {color_rgb[2]}, {opacity * 0.5})'
+            # Convert datetime x-axis to year for consistent x-axis labeling
+            if x_axis == 'track_album_release_date':
+                ts['year_for_x'] = ts[x_axis].dt.year
+                plot_x = 'year_for_x'
+            else:
+                plot_x = x_axis
             fig_area.add_trace(
-                go.Scatter(x=ts[x_axis], y=ts[feature], fill='tozeroy', mode='lines', name=f"{feature} {decade}", line=dict(color=color), fillcolor=color),
+                go.Scatter(x=ts[plot_x], y=ts[feature], fill='tozeroy', mode='lines', name=f"{feature} {decade}", line=dict(color=line_color), fillcolor=fill_color),
                 row=row, col=col
+            )
+
+        # Set x-axis range for all subplots and add vertical line at the center of the selected decade
+        decade_centers = {
+            '50s': 1955, '60s': 1965, '70s': 1975, '80s': 1985, '90s': 1995, '00s': 2005, '10s': 2015, '20s': 2025
+        }
+        center_year = decade_centers.get(current_decade, 1980)
+        for i in range(len(available_features)):
+            fig_area.update_xaxes(range=[1950, 2030], row=i+1, col=1, title_text='Year')
+            # Add vertical line at the center of the selected decade
+            fig_area.add_vline(
+                x=center_year,
+                line_width=3,
+                line_dash="dash",
+                line_color="red",
+                row=i+1,
+                col=1,
             )
     fig_area.update_layout(height=None, width=None, showlegend=False, title_text="Area Plots of Normalized Audio Features", autosize=True, margin=dict(t=30, b=30, l=30, r=30), title_font=dict(size=12))
     return fig_area
 
 
 # New function for timeline
-def draw_timeline(decade):
+def draw_timeline(decade, bin_size="5 months"):
     filtered_data = spider_data[spider_data['decade'] == decade]
     
     if 'track_album_release_date' in filtered_data.columns:
@@ -175,17 +242,59 @@ def draw_timeline(decade):
         )
         return fig
     
+    if bin_size == "No bins":
+        total_songs = len(dates)
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=["Total"],
+            y=[total_songs],
+            marker_color='white'
+        ))
+        fig.update_layout(
+            xaxis=dict(title="", tickfont=dict(color='white')),
+            yaxis=dict(title="Number of Songs", tickfont=dict(color='white')),
+            height=200,
+            autosize=True,
+            margin=dict(t=10, b=40, l=40, r=20),
+            paper_bgcolor="rgba(0,0,0,0.5)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="white")
+        )
+        return fig
+    
     min_date = dates.min()
     max_date = dates.max()
     
-    # Create bins every 5 months
-    bins = pd.date_range(start=min_date, end=max_date + pd.DateOffset(months=5), freq='5MS')
+    # Set freq based on bin_size
+    if bin_size == "No bins":
+        freq = 'YS'
+        offset = pd.DateOffset(years=1)
+        label_suffix = pd.DateOffset(years=1, days=-1)
+    elif bin_size == "1 week":
+        freq = 'W'
+        offset = pd.DateOffset(weeks=1)
+        label_suffix = pd.DateOffset(weeks=1, days=-1)
+    elif bin_size == "1 month":
+        freq = 'MS'
+        offset = pd.DateOffset(months=1)
+        label_suffix = pd.DateOffset(months=1, days=-1)
+    elif bin_size == "5 months":
+        freq = '5MS'
+        offset = pd.DateOffset(months=5)
+        label_suffix = pd.DateOffset(months=5, days=-1)
+    else:
+        freq = '5MS'  # default
+        offset = pd.DateOffset(months=5)
+        label_suffix = pd.DateOffset(months=5, days=-1)
+    
+    # Create bins
+    bins = pd.date_range(start=min_date, end=max_date + offset, freq=freq)
     
     if len(bins) < 2:
-        bins = pd.date_range(start=min_date, periods=2, freq='5MS')
+        bins = pd.date_range(start=min_date, periods=2, freq=freq)
     
     # Bin the dates
-    binned = pd.cut(dates, bins=bins, right=False, labels=[f"{b.strftime('%Y-%m')}-{ (b + pd.DateOffset(months=5) - pd.DateOffset(days=1)).strftime('%Y-%m')}" for b in bins[:-1]])
+    binned = pd.cut(dates, bins=bins, right=False, labels=[f"{b.strftime('%Y-%m-%d')}-{ (b + label_suffix).strftime('%Y-%m-%d')}" for b in bins[:-1]])
     
     # Count per bin
     counts = binned.value_counts().sort_index()
@@ -200,7 +309,7 @@ def draw_timeline(decade):
     
     fig.update_layout(
         xaxis=dict(
-            title="5-Month Bins",
+            title=f"{bin_size} Bins",
             tickfont=dict(color='white')
         ),
         yaxis=dict(
@@ -208,7 +317,7 @@ def draw_timeline(decade):
             tickfont=dict(color='white')
         ),
         height=200,  # adjust height for better visibility
-        autosize=True,
+        autosize=False,
         margin=dict(t=10, b=40, l=40, r=20),
         paper_bgcolor="rgba(0,0,0,0.5)",
         plot_bgcolor="rgba(0,0,0,0)",
