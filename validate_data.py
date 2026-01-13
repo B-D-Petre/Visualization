@@ -27,7 +27,7 @@ def validate():
     ]
     
     for track in check_tracks:
-        matches = df[df['track_name'].str.contains(track, case=False, regex=False)]
+        matches = df[df['track_name'].str.contains(track, case=False, regex=False, na=False)]
         if not matches.empty:
             print(f"\nTrack: {track}")
             # Show relevant columns
@@ -46,7 +46,7 @@ def validate():
         
         decades = sorted(df['decade'].unique())
         for dec in decades:
-            dec_df = df[df['decade'] == dec]
+            dec_df = df[df['decade'] == dec].copy()
             f.write(f"\n\nDECADE: {dec} (Count: {len(dec_df)})\n")
             f.write("-" * 40 + "\n")
             f.write(f"{'Year':<6} | {'Release Date':<12} | {'Artist':<20} | {'Track Name'}\n")

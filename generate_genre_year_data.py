@@ -4,36 +4,18 @@ import pandas as pd
 import os
 
 def generate_data():
-    print("Loading data...")
-    file_paths = ["high_popularity_spotify_data.csv", "low_popularity_spotify_data.csv"]
-    database = []
 
-    for file_path in file_paths:
-        try:
-            df = kagglehub.load_dataset(
-                KaggleDatasetAdapter.PANDAS,
-                "solomonameh/spotify-music-dataset",
-                file_path,
-            )
-            database.append(df)
-        except Exception as e:
-            print(f"Error loading {file_path}: {e}")
-            return
+    #changed datasource to main_data_kaggle.csv
+    main_data = pd.read_csv("assets/main_data_kaggle.csv")
+    print("Data loaded. Columns:", main_data.columns)
 
-    if not database:
-        print("No data loaded.")
-        return
-
-    spotify_combined = pd.concat(database, ignore_index=True)
-    print("Data loaded. Columns:", spotify_combined.columns)
-
-    if 'playlist_genre' not in spotify_combined.columns:
+    if 'playlist_genre' not in main_data.columns:
         print("Error: 'playlist_genre' column missing.")
         return
 
     # Process date/year
-    spotify_combined["track_album_release_date"] = pd.to_datetime(spotify_combined["track_album_release_date"], format="mixed", errors='coerce')
-    spotify_combined['year'] = spotify_combined['track_album_release_date'].dt.year
+    main_data["track_album_release_date"] = pd.to_datetime(main_data["track_album_release_date"], format="mixed", errors='coerce')
+    main_data['year'] = main_data['track_album_release_date'].dt.year
     
     # --- FIX RE-RELEASE DATES (Same logic as regenerate_csv.py) ---
     import re
@@ -47,22 +29,24 @@ def generate_data():
         name = re.sub(r' - .*Mix.*', '', name, flags=re.IGNORECASE)
         return name.strip()
 
-    spotify_combined['clean_name'] = spotify_combined['track_name'].apply(clean_track_name)
+    main_data['clean_name'] = main_data['track_name'].apply(clean_track_name)
 
     # Find the minimum year for each (clean_name, artist) pair
-    min_years = spotify_combined.groupby(['clean_name', 'track_artist'])['year'].min().reset_index()
+    min_years = main_data.groupby(['clean_name', 'track_artist'])['year'].min().reset_index()
     min_years = min_years.rename(columns={'year': 'original_year'})
 
     # Merge back to original dataframe
-    spotify_combined = pd.merge(spotify_combined, min_years, on=['clean_name', 'track_artist'], how='left')
+    main_data = pd.merge(main_data, min_years, on=['clean_name', 'track_artist'], how='left')
 
     # Update year
-    spotify_combined['year'] = spotify_combined['original_year'].fillna(spotify_combined['year'])
+    main_data['year'] = main_data['original_year'].fillna(main_data['year'])
     # ----------------------------------------------------------------
     
     # Filter for valid years and genres
-    df_clean = spotify_combined.dropna(subset=['year', 'playlist_genre'])
-    df_clean['year'] = df_clean['year'].astype(int)
+    # Use .copy() to ensure we modify a separate DataFrame and avoid SettingWithCopyWarning
+    df_clean = main_data.dropna(subset=['year', 'playlist_genre']).copy()
+    # Use .loc for explicit assignment
+    df_clean.loc[:, 'year'] = df_clean['year'].astype(int)
     
     # Filter year range 1950-2030 (as requested/logical)
     df_clean = df_clean[(df_clean['year'] >= 1950) & (df_clean['year'] <= 2030)]
