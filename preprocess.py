@@ -5,8 +5,8 @@ import pandas as pd
 #Fix genres in csv
 main_data = pd.read_csv("assets/main_data_kaggle.csv")
 main_data['playlist_genre'] = main_data['playlist_genre'].str.split(',').str[0]
-main_data.to_csv("assets/main_data_kaggle.csv", index=False)
 main_data.rename(columns={'uri': 'track_id'}, inplace=True)
+main_data.to_csv("assets/main_data_kaggle.csv", index=False)
 
 
 # List of your scripts
