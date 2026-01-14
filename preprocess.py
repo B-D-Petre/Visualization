@@ -121,8 +121,10 @@ def main():
     # 4. GENERATE SPIDER GRAPH DATA
     print("Generating Spider Graph Data...")
     
-    # --- ADDED 'tempo' HERE ---
-    raw_features = ["energy", "danceability", "valence", "acousticness", "instrumentalness", "tempo"]
+    # --- UPDATED FEATURES LIST ---
+    # Swapped: Tempo -> duration_ms, Valence -> loudness, Instrumentalness -> speechiness
+    raw_features = ["energy", "danceability", "loudness", "acousticness", "speechiness", "duration_ms"]
+    
     metadata_cols = ['track_name', 'track_artist', 'year', 'track_id', 'playlist_genre']
 
     available_cols = [c for c in metadata_cols + raw_features if c in main_data.columns]
@@ -134,19 +136,24 @@ def main():
 
     df_spider['decade'] = df_spider['year'].apply(_compute_decade_str)
 
-    # Normalize Features (This will now include Tempo)
+    # Normalize Features
     for col in raw_features:
         if col in df_spider.columns:
             min_val = df_spider[col].min()
             max_val = df_spider[col].max()
+            
             # Avoid division by zero
             if max_val - min_val != 0:
                 df_spider[col] = (df_spider[col] - min_val) / (max_val - min_val)
             else:
                 df_spider[col] = 0
             
-            # Capitalize (Tempo -> Tempo)
-            df_spider.rename(columns={col: col.capitalize()}, inplace=True)
+            # Format Column Names
+            new_name = col.capitalize()
+            if col == "duration_ms":
+                new_name = "Duration" # Cleaner name for the chart
+            
+            df_spider.rename(columns={col: new_name}, inplace=True)
 
     df_spider = df_spider.drop_duplicates(subset=['track_id'], keep='first')
     df_spider.to_csv(SPIDER_OUTPUT, index=False)
@@ -174,10 +181,6 @@ def main():
         print("-" * 30)
         print("Top 5 Most Common Genres:")
         for genre, count in genre_counts.head(5).items():
-            print(f"  - {genre}: {count}")
-        print("-" * 30)
-        print("Bottom 5 Genres (Lowest Count >= 5):")
-        for genre, count in genre_counts.tail(5).items():
             print(f"  - {genre}: {count}")
     
     if 'year' in main_data.columns:
