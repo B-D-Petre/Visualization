@@ -357,8 +357,8 @@ def update_analysis1(selected_genres, current_decade):
             
             # Customize layout for the grid item
             fig.update_layout(
-                title=dict(text=f"{genre.title()}", font=dict(size=s_font, color=line_color), y=0.95), 
-                margin=dict(l=20*scale, r=20*scale, t=40*scale, b=20*scale),
+                # title=dict(text=f"{genre.title()}", font=dict(size=s_font, color=line_color), y=0.95), 
+                margin=dict(l=20*scale, r=20*scale, t=25*scale, b=25*scale),
                 height=s_h, # Match container height
                 font=dict(size=max(8, 10*scale)) # Scale axis labels too
             )
@@ -368,6 +368,7 @@ def update_analysis1(selected_genres, current_decade):
                     className="honeycomb-cell",
                     style=cell_style_override,
                     children=[
+                        html.Div(f"{genre.title()}", className="honeycomb-title", style={"color": "white"}),
                         dcc.Graph(
                             id={'type': 'spider-genre', 'index': genre}, # Dynamic ID for pattern matching
                             figure=fig, 

@@ -191,30 +191,30 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                              n_clicks=0,
                              children=[
                                  html.Div([
-                                     html.Span("E: Energy", style={"marginRight": "10px", "color": "#FF6B6B", "fontWeight": "bold"}),
-                                     html.Span("D: Danceability", style={"marginRight": "10px", "color": "#DA77F2", "fontWeight": "bold"}),
-                                     html.Span("V: Valence", style={"marginRight": "10px", "color": "#FFD93D", "fontWeight": "bold"}),
-                                     html.Span("A: Acousticness", style={"marginRight": "10px", "color": "#6BCB77", "fontWeight": "bold"}),
-                                     html.Span("I: Instrumentalness", style={"color": "#4D96FF", "fontWeight": "bold"})
+                                     html.Span("E: Energy", style={"marginRight": "10px", "color": "#E0E0E0", "fontWeight": "bold"}),
+                                     html.Span("D: Danceability", style={"marginRight": "10px", "color": "#E0E0E0", "fontWeight": "bold"}),
+                                     html.Span("V: Valence", style={"marginRight": "10px", "color": "#E0E0E0", "fontWeight": "bold"}),
+                                     html.Span("A: Acousticness", style={"marginRight": "10px", "color": "#E0E0E0", "fontWeight": "bold"}),
+                                     html.Span("I: Instrumentalness", style={"color": "#E0E0E0", "fontWeight": "bold"})
                                  ]),
                                  # Tooltip Content
                                  html.Div([
                                      html.Div([
                                          # Column 1
                                          html.Div([
-                                             html.Div([html.Strong("Energy", style={"color": "#FF6B6B", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Intensity, speed, and noise level", style={"color": "white", "fontSize": "0.9em"})], style={"marginBottom": "12px"}),
-                                             html.Div([html.Strong("Danceability", style={"color": "#DA77F2", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Rhythm stability and beat strength", style={"color": "white", "fontSize": "0.9em"})])
+                                             html.Div([html.Strong("Energy", style={"color": "#E0E0E0", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Intensity, speed, and noise level", style={"color": "white", "fontSize": "0.9em"})], style={"marginBottom": "12px"}),
+                                             html.Div([html.Strong("Danceability", style={"color": "#E0E0E0", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Rhythm stability and beat strength", style={"color": "white", "fontSize": "0.9em"})])
                                          ], style={"flex": "1", "padding": "0 10px"}),
                                          
                                          # Column 2
                                          html.Div([
-                                             html.Div([html.Strong("Valence", style={"color": "#FFD93D", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Musical positiveness (Happy vs Sad)", style={"color": "white", "fontSize": "0.9em"})], style={"marginBottom": "12px"}),
-                                             html.Div([html.Strong("Acousticness", style={"color": "#6BCB77", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Presence of acoustic instruments", style={"color": "white", "fontSize": "0.9em"})])
+                                             html.Div([html.Strong("Valence", style={"color": "#E0E0E0", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Musical positiveness (Happy vs Sad)", style={"color": "white", "fontSize": "0.9em"})], style={"marginBottom": "12px"}),
+                                             html.Div([html.Strong("Acousticness", style={"color": "#E0E0E0", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Presence of acoustic instruments", style={"color": "white", "fontSize": "0.9em"})])
                                          ], style={"flex": "1", "padding": "0 10px", "borderLeft": "1px solid rgba(255,255,255,0.1)", "borderRight": "1px solid rgba(255,255,255,0.1)"}),
                                          
                                          # Column 3
                                          html.Div([
-                                             html.Div([html.Strong("Instrumentalness", style={"color": "#4D96FF", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Likelihood of no vocal content", style={"color": "white", "fontSize": "0.9em"})])
+                                             html.Div([html.Strong("Instrumentalness", style={"color": "#E0E0E0", "display": "block", "marginBottom": "2px", "fontSize": "1.1em"}), html.Span("Likelihood of no vocal content", style={"color": "white", "fontSize": "0.9em"})])
                                          ], style={"flex": "1", "padding": "0 10px"})
                                      ], style={"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "textAlign": "left", "paddingTop": "5px"})
                                  ], id="analysis1-legend-content", className="legend-tooltip")
@@ -367,7 +367,7 @@ def draw_spider_analysis1(decades_list, current_decade, selected_genres=None, ov
     }
     categories = ["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"]
     category_labels = [c[0] for c in categories]
-    label_colors = ["#FF6B6B", "#DA77F2", "#FFD93D", "#6BCB77", "#4D96FF"] 
+    label_colors = ["#E0E0E0"] * 5 # Monochromatic white-ish for labels to distinguish from genres 
     
     fig = go.Figure()
     
