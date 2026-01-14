@@ -30,89 +30,100 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
             
             pane = html.Div(
                 style={
-                    "padding": "30px",
-                    "display": "grid",
-                    "gridTemplateColumns": "1fr 1fr",  # 2 columns
-                    "gridTemplateRows": "auto auto 1fr",  # Rows for Dropdowns, Players, Graph
-                    "gridGap": "20px",
+                    "padding": "30px 30px 20px 30px", # Reduced bottom padding for tighter decade bar fit
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "gap": "20px",
                     "background": "rgba(0,0,0,0)",
                     "height": "100%",
                     "boxSizing": "border-box"
                 },
                 children=[
-                    # Song 1 Selection
+                    # Left Column: Song Selectors
                     html.Div(
-                        style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
+                        style={"flex": "1", "display": "flex", "flexDirection": "column", "gap": "20px", "height": "100%"},
                         children=[
-                            html.H4("Select Song 1", style={"margin": "0 0 5px 0", "color": "white"}), 
-                            dcc.Dropdown(
-                                id="song-1-dropdown",
-                                options=song_options,
-                                value=available_songs[0][1] if available_songs else None,
-                                style={"color": "black"}
+                            # Song 1 Selection (Top Left)
+                            html.Div(
+                                style={"flex": "1", "display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "boxSizing": "border-box", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
+                                children=[
+                                    html.H4("Select Song 1", style={"margin": "0 0 5px 0", "color": "white"}), 
+                                    dcc.Dropdown(
+                                        id="song-1-dropdown",
+                                        options=song_options,
+                                        value=available_songs[0][1] if available_songs else None,
+                                        style={"color": "black"}
+                                    ),
+                                    # Checkbox for Genre 1 Average
+                                    dcc.Checklist(
+                                        id='genre-1-avg-checkbox',
+                                        options=[{'label': ' Show Genre Average', 'value': 'show'}],
+                                        value=[],
+                                        style={"color": "white", "fontSize": "0.9em"}
+                                    ),
+                                    html.Iframe(
+                                        id="player-1",
+                                        src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", 
+                                        style={
+                                            "height": "80px", 
+                                            "width": "100%", 
+                                            "flex": "1", # Fill remaining vertical space?
+                                            "border": "0",
+                                            "borderRadius": "0px"
+                                        }
+                                    )
+                                ]
                             ),
-                            # Checkbox for Genre 1 Average
-                            dcc.Checklist(
-                                id='genre-1-avg-checkbox',
-                                options=[{'label': ' Show Genre Average', 'value': 'show'}],
-                                value=[],
-                                style={"color": "white", "fontSize": "0.9em"}
-                            ),
-                            html.Iframe(
-                                id="player-1",
-                                src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", 
-                                style={
-                                    "height": "80px", 
-                                    "width": "100%", 
-                                    "border": "0",
-                                    "borderRadius": "0px"
-                                }
+                            
+                            # Song 2 Selection (Bottom Left)
+                            html.Div(
+                                 style={"flex": "1", "display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "boxSizing": "border-box", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
+                                 children=[
+                                    html.H4("Select Song 2", style={"margin": "0 0 5px 0", "color": "white"}),
+                                    dcc.Dropdown(
+                                        id="song-2-dropdown",
+                                        options=song_options,
+                                        value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0][1],
+                                        style={"color": "black"}
+                                    ),
+                                    # Checkbox for Genre 2 Average
+                                    dcc.Checklist(
+                                        id='genre-2-avg-checkbox',
+                                        options=[{'label': ' Show Genre Average', 'value': 'show'}],
+                                        value=[],
+                                        style={"color": "white", "fontSize": "0.9em"}
+                                    ),
+                                    html.Iframe(
+                                        id="player-2",
+                                        src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", 
+                                        style={
+                                            "height": "80px", 
+                                            "width": "100%", 
+                                            "flex": "1",
+                                            "border": "0",
+                                            "borderRadius": "0px"
+                                        }
+                                    )
+                                ]
                             )
                         ]
                     ),
                     
-                    # Song 2 Selection
-                    html.Div(
-                         style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
-                         children=[
-                            html.H4("Select Song 2", style={"margin": "0 0 5px 0", "color": "white"}),
-                            dcc.Dropdown(
-                                id="song-2-dropdown",
-                                options=song_options,
-                                value=available_songs[1][1] if len(available_songs) > 1 else available_songs[0][1],
-                                style={"color": "black"}
-                            ),
-                            # Checkbox for Genre 2 Average
-                            dcc.Checklist(
-                                id='genre-2-avg-checkbox',
-                                options=[{'label': ' Show Genre Average', 'value': 'show'}],
-                                value=[],
-                                style={"color": "white", "fontSize": "0.9em"}
-                            ),
-                            html.Iframe(
-                                id="player-2",
-                                src="https://open.spotify.com/embed/track/2plbrEY59IikOBgBGLjaoe", 
-                                style={
-                                    "height": "80px", 
-                                    "width": "100%", 
-                                    "border": "0",
-                                    "borderRadius": "0px"
-                                }
-                            )
-                        ]
-                    ),
-                    
-                    # Spider Graph Area
+                    # Spider Graph Area (Right Column)
                     html.Div(
                         dcc.Graph(
                             id="spider-graph", 
                             figure=draw_figure(topbar_tab, decades_list, current_decade, song1=available_songs[0][1], song2=available_songs[1][1]),
-                            style={"height": "100%", "width": "100%"}
+                            style={"flex": "1", "width": "100%", "height": "100%"}
                         ),
                         style={
+                            "flex": "1",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "height": "100%",
                             "background": "rgba(30, 30, 40, 0.7)",  # Matching background
                             "padding": "20px",
-                            "gridColumn": "1 / -1",  
+                            "boxSizing": "border-box",  # Fix overflow from padding
                             "borderRadius": "0px",
                             "border": "1px solid rgba(255,255,255,0.05)",
                             "minHeight": "0"
@@ -173,9 +184,9 @@ app.layout = html.Div(id = "root_container", children=[
         dcc.Tabs(id="topbar_tabs", value="topic-1", 
             parent_style={"flexDirection": "row", "width": "100%"},
             children=[
-            dcc.Tab(label="Analysis 1", value="topic-1", className="top-tab", selected_className="top-tab--selected"),
-            dcc.Tab(label="Compare/Listen", value="topic-3", className="top-tab", selected_className="top-tab--selected"),
-            dcc.Tab(label="Changes", value="topic-4", className="top-tab", selected_className="top-tab--selected")
+            dcc.Tab(label="The Elements", value="topic-1", className="top-tab", selected_className="top-tab--selected"),
+            dcc.Tab(label="The Journey", value="topic-4", className="top-tab", selected_className="top-tab--selected"),
+            dcc.Tab(label="The Spotlight", value="topic-3", className="top-tab", selected_className="top-tab--selected")
         ])
     ], 
              style={"background" : "rgba(20, 22, 35, 0.95)", "flexDirection" : "column", "borderBottom": "1px solid rgba(255,255,255,0.1)", "boxShadow": "0 4px 15px rgba(0,0,0,0.3)", "zIndex": "1001"}), 
@@ -191,41 +202,38 @@ app.layout = html.Div(id = "root_container", children=[
     html.Div(children = [
         # Main content area (Now full width)
         html.Div(id="content_area", children = "Loading...", style={"flex" : "1", "position": "relative", "overflow": "hidden", "height": "100%"}), # Added height 100%
-
-        # Floating Decades Menu (Formerly Sidebar)
-        html.Div(children = [
-            dcc.Tabs(id="sidebar_tabs", vertical=False, value="20s", 
-                parent_style={"flexDirection": "row", "justifyContent": "center"}, # Center tabs
-                children=[
-                dcc.Tab(label="50s", value="50s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="60s", value="60s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="70s", value="70s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="80s", value="80s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="90s", value="90s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="00s", value="00s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="10s", value="10s", className="decade-tab", selected_className="decade-tab--selected"),
-                dcc.Tab(label="20s", value="20s", className="decade-tab", selected_className="decade-tab--selected"),
-            ])
-        ], 
-        style={
-            "position": "absolute", 
-            "bottom": "0", 
-            "width": "100%", 
-            "padding": "10px", 
-            "background": "rgba(20, 22, 35, 0.95)", # Matched to top bar
-            "borderTop": "1px solid rgba(255,255,255,0.1)",
-            "boxShadow": "0 -4px 15px rgba(0,0,0,0.3)",
-            "display": "flex",
-            "justifyContent": "center",
-            "zIndex": "1000"
-        }), 
     ],
     #Options
-    style={"display" : "flex", "flexDirection" : "column", "flex" : "1", "minHeight": "0", "overflow": "hidden", "position": "relative"} # Changed to column to stack if needed, but mainly relative for absolute child
+    style={"display" : "flex", "flexDirection" : "column", "flex" : "1", "minHeight": "0", "overflow": "hidden", "position": "relative"} 
     ),
 
-    #Bottom bar (Credits logos and so on)
-    html.Div("Here we will put the Bottom bar", style = {"background" : "#5B5757"})
+    # Top-Level Bottom bar (Formerly Floating Decades Menu)
+    html.Div(children = [
+        dcc.Tabs(id="sidebar_tabs", vertical=False, value="20s", 
+            parent_style={"flexDirection": "row", "justifyContent": "center"}, # Center tabs
+            children=[
+            dcc.Tab(label="50s", value="50s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="60s", value="60s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="70s", value="70s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="80s", value="80s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="90s", value="90s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="00s", value="00s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="10s", value="10s", className="decade-tab", selected_className="decade-tab--selected"),
+            dcc.Tab(label="20s", value="20s", className="decade-tab", selected_className="decade-tab--selected"),
+        ])
+    ], 
+    style={
+        "width": "100%", 
+        "padding": "20px",  # Increased padding (30% bigger feel)
+        "background": "rgba(20, 22, 35, 0.95)", # Matched to top bar
+        "borderTop": "1px solid rgba(255,255,255,0.1)",
+        "boxShadow": "0 -4px 15px rgba(0,0,0,0.3)",
+        "display": "flex",
+        "justifyContent": "center",
+        "zIndex": "1000",
+        "flexShrink": 0,
+        "fontSize": "1.5em" # Increased font size
+    })
 ]
 #Options
 , style={"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw", "backgroundColor": "#011F26"} # Fixed background color
