@@ -8,9 +8,13 @@ import subprocess
 import sys
 
 #Get the correct data run preprocessing
+<<<<<<< HEAD
 subprocess.run([sys.executable, "preprocess.py"])   
 
 
+=======
+subprocess.run(["python", "preprocess.py"])
+>>>>>>> 49e0756346645e4c2729f6afbe390734f21c0fca
  
 # This function arranges the plots in an html layout
 def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months", selected_genres=None):
