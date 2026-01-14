@@ -6,5 +6,6 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
+*test*
 dist/
 build/
