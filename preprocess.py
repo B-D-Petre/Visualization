@@ -32,7 +32,7 @@ def main():
         print(f"Error: {INPUT_FILE} not found.")
         return
 
-    # 2. INITIAL COLUMN CLEANING (from preprocess.py)
+    # 2. INITIAL COLUMN CLEANING
     # Fix Genres (split comma-separated values and take the first one)
     if 'playlist_genre' in main_data.columns:
         main_data['playlist_genre'] = main_data['playlist_genre'].str.split(',').str[0]
@@ -51,9 +51,14 @@ def main():
         print("Error: 'track_name' column missing.")
         return
 
-    # 3. DATE & RE-RELEASE LOGIC (Shared by all scripts)
+    # 3. DATE & RE-RELEASE LOGIC
     print("Processing dates and fixing re-releases...")
     
+    # --- FIX: Drop 'original_year' if it exists from a previous run ---
+    # This prevents the merge from creating 'original_year_x' and 'original_year_y'
+    if 'original_year' in main_data.columns:
+        main_data.drop(columns=['original_year'], inplace=True)
+
     # Convert dates
     main_data["track_album_release_date"] = pd.to_datetime(main_data["track_album_release_date"], format="mixed", errors='coerce')
     main_data['year'] = main_data['track_album_release_date'].dt.year
@@ -70,14 +75,14 @@ def main():
     # Merge back and update year
     main_data = pd.merge(main_data, min_years, on=group_cols, how='left')
     main_data['year'] = main_data['original_year'].fillna(main_data['year'])
-    main_data['year'] = main_data['year'].astype('Int64') # Allow NaNs but keep as int logic
+    main_data['year'] = main_data['year'].astype('Int64')
 
-    # Save the cleaned main data (Overwrite original as per old preprocess.py)
+    # Save the cleaned main data
     main_data.to_csv(INPUT_FILE, index=False)
     print(f"Main cleaned data saved to {INPUT_FILE}")
 
     # ---------------------------------------------------------
-    # 4. GENERATE SPIDER GRAPH DATA (from regenerate_csv.py)
+    # 4. GENERATE SPIDER GRAPH DATA
     # ---------------------------------------------------------
     print("Generating Spider Graph Data...")
     
@@ -112,7 +117,7 @@ def main():
     print(f"Saved: {SPIDER_OUTPUT}")
 
     # ---------------------------------------------------------
-    # 5. GENERATE GENRE/YEAR DATA (from generate_genre_year_data.py)
+    # 5. GENERATE GENRE/YEAR DATA
     # ---------------------------------------------------------
     print("Generating Genre/Year Counts...")
 
@@ -131,9 +136,6 @@ def main():
     print(f"Saved: {GENRE_YEAR_OUTPUT}")
 
     print("\n--- All preprocessing complete! ---")
-    
-    # Note: 'test_timeline.py' was not provided in the upload, 
-    # so it is not included here. You can run it manually if needed.
 
 if __name__ == "__main__":
     main()
