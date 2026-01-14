@@ -14,15 +14,11 @@ subprocess.run(["python", "preprocess.py"])
 def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months", selected_genres=None):
     if topbar_tab == "topic-1":
         content = draw_figure(topbar_tab, decades_list, current_decade, selected_genres=selected_genres)
-        filename = current_decade + ".png"
         pane = html.Div(
             style={
                 "height": "100%", "width": "100%",
-                "backgroundImage": f"linear-gradient(to right, #1a1c2c 50%, transparent 50%), url('/assets/{filename}')", # Darker Discord-like blue
-                "backgroundSize": "cover",
-                "backgroundPosition": "center",
-                "backgroundRepeat": "no-repeat",
                 "display": "flex"
+                # Removed background image logic
             },
             children=[content]
         )
@@ -46,7 +42,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
                 children=[
                     # Song 1 Selection
                     html.Div(
-                        style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "10px", "border": "1px solid rgba(255,255,255,0.05)"},
+                        style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
                         children=[
                             html.H4("Select Song 1", style={"margin": "0 0 5px 0", "color": "white"}), 
                             dcc.Dropdown(
@@ -69,7 +65,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
                                     "height": "80px", 
                                     "width": "100%", 
                                     "border": "0",
-                                    "borderRadius": "8px"
+                                    "borderRadius": "0px"
                                 }
                             )
                         ]
@@ -77,7 +73,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
                     
                     # Song 2 Selection
                     html.Div(
-                         style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "10px", "border": "1px solid rgba(255,255,255,0.05)"},
+                         style={"display": "flex", "flexDirection": "column", "gap": "10px", "background": "rgba(30, 30, 40, 0.7)", "padding": "15px", "borderRadius": "0px", "border": "1px solid rgba(255,255,255,0.05)"},
                          children=[
                             html.H4("Select Song 2", style={"margin": "0 0 5px 0", "color": "white"}),
                             dcc.Dropdown(
@@ -100,7 +96,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
                                     "height": "80px", 
                                     "width": "100%", 
                                     "border": "0",
-                                    "borderRadius": "8px"
+                                    "borderRadius": "0px"
                                 }
                             )
                         ]
@@ -117,7 +113,7 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
                             "background": "rgba(30, 30, 40, 0.7)",  # Matching background
                             "padding": "20px",
                             "gridColumn": "1 / -1",  
-                            "borderRadius": "10px",
+                            "borderRadius": "0px",
                             "border": "1px solid rgba(255,255,255,0.05)",
                             "minHeight": "0"
                         },
@@ -216,7 +212,9 @@ app.layout = html.Div(id = "root_container", children=[
             "bottom": "0", 
             "width": "100%", 
             "padding": "10px", 
-            "background": "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%)", # Gradient fade
+            "background": "rgba(20, 22, 35, 0.95)", # Matched to top bar
+            "borderTop": "1px solid rgba(255,255,255,0.1)",
+            "boxShadow": "0 -4px 15px rgba(0,0,0,0.3)",
             "display": "flex",
             "justifyContent": "center",
             "zIndex": "1000"
@@ -230,7 +228,7 @@ app.layout = html.Div(id = "root_container", children=[
     html.Div("Here we will put the Bottom bar", style = {"background" : "#5B5757"})
 ]
 #Options
-, style={"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw" } #currently takes 100% of avaialble viewport height This might be stupid
+, style={"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw", "backgroundColor": "#011F26"} # Fixed background color
 )
 
 #---------------------------------------------------------------------------#
@@ -265,17 +263,14 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_si
     if decade_changed:
         animation_trigger = (animation_trigger or 0) + 1
 
-    #This is for changing the background image depending on what decade is selected
-    filename = sidebar_tab_value + ".png"
-    root_style = {"display" : "flex", "flexDirection" : "column", "height" : "100vh", "width" : "100vw"}
-    
-    if topbar_tab_value != "topic-1":
-         root_style.update({
-              "backgroundImage": f"url('/assets/{filename}')", 
-              "background-size": "cover",
-              "background-position": "center",
-              "background-repeat": "no-repeat"
-         })
+    # Fixed background for all tabs
+    root_style = {
+        "display" : "flex", 
+        "flexDirection" : "column", 
+        "height" : "100vh", 
+        "width" : "100vw",
+        "backgroundColor": "#01191e"
+    }
     
     return draw_pane(topbar_tab_value, selected_decades, sidebar_tab_value, bin_size=bin_size, selected_genres=selected_genres), root_style, selected_decades, sidebar_tab_value, animation_trigger
 
