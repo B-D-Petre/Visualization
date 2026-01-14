@@ -226,7 +226,7 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                                  "fontFamily": "sans-serif",
                                  "backgroundColor": "rgba(0,0,0,0.3)", 
                                  "padding": "5px",
-                                 "borderRadius": "5px",
+                                 "borderRadius": "0px",
                                  "cursor": "pointer"
                              }
                          ),
@@ -273,7 +273,7 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                          "flexDirection": "column", 
                          "minWidth": "0",
                          "border": "2px solid rgba(60, 65, 90, 0.7)", 
-                         "borderRadius": "10px",
+                         "borderRadius": "0px",
                          "overflow": "hidden"
                      },
                      children=[
