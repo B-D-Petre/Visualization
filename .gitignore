@@ -7,5 +7,9 @@ __pycache__/
 *.egg
 *.egg-info/
 *test*
+genre_year_counts.csv
+main_data_kaggle.csv
+spider_graph_data.csv
+genre_counts_preprocessed.csv
 dist/
 build/

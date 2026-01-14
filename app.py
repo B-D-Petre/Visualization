@@ -4,6 +4,13 @@ import os
 import webbrowser
 from figures import *
 import plotly.express as px
+import subprocess
+
+
+#Get the correct data run preprocessing
+subprocess.run(["python", "preprocess.py"])   
+
+
  
 # This function arranges the plots in an html layout
 def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months", selected_genres=None):
