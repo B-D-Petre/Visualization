@@ -99,7 +99,7 @@ def draw_genre_trends(decade_center=None):
     style_fig(fig)
     return fig
 
-def draw_rate_of_change_barplot(current_decade, selected_genres=None):
+def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_breakdown=False):
     ordered_decades = ['50s', '60s', '70s', '80s', '90s', '00s', '10s', '20s']
     if current_decade not in ordered_decades:
         return go.Figure()
@@ -158,36 +158,101 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None):
         c_means = c_g[categories].mean()
         p_means = p_g[categories].mean()
         
-        # Sum of absolute differences (Total Rate of Change)
-        total_change = (c_means - p_means).abs().sum()
+        # Calculate per-feature change
+        feature_changes = (c_means - p_means).abs()
         
-        change_data.append({'genre': genre, 'total_change': total_change})
+        row_data = {'genre': genre, 'total_change': feature_changes.sum()}
+        for cat in categories:
+            row_data[cat] = feature_changes[cat]
+            
+        change_data.append(row_data)
         
     if not change_data:
         return go.Figure().update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", xaxis=dict(visible=False), yaxis=dict(visible=False))
 
     df_plot = pd.DataFrame(change_data)
     
-    # Map colors
-    colors = [GENRE_COLOR_MAP.get(g, '#ffffff') for g in df_plot['genre']]
-    
-    fig = go.Figure(data=[go.Bar(
-        x=df_plot['genre'],
-        y=df_plot['total_change'],
-        marker_color=colors,
-        text=df_plot['total_change'].apply(lambda x: f"{x:.2f}"),
-        textposition='auto',
-        hoverinfo='x+y+text'
-    )])
+    fig = go.Figure()
+
+    if show_breakdown:
+        # Stacked Bar Chart (Breakdown)
+        # Strategy: Use the genre's color (solid), but separate segments with white outline.
+        # Label: Full Feature Name if segment is large enough.
+        
+        # 1. Pre-calculate colors and texts
+        colors_for_feature = {cat: [] for cat in categories}
+        text_for_feature = {cat: [] for cat in categories}
+
+        for i, row in df_plot.iterrows():
+            genre = row['genre']
+            # Strict adherence to GENRE_COLOR_MAP
+            base_hex = GENRE_COLOR_MAP.get(genre, '#888888')
+            
+            # Convert to RBGA with opacity 0.6
+            if base_hex.startswith('#'):
+                 base_rgb = pcolors.hex_to_rgb(base_hex)
+            elif base_hex.startswith('rgb'):
+                 vals = base_hex[4:-1].split(',')
+                 base_rgb = (int(vals[0]), int(vals[1]), int(vals[2]))
+            else:
+                 base_rgb = (200, 200, 200)
+
+            rgba_str = f'rgba({base_rgb[0]}, {base_rgb[1]}, {base_rgb[2]}, 0.6)'
+            
+            # Use same color for all features of this genre
+            for cat in categories:
+                colors_for_feature[cat].append(rgba_str)
+                
+                # Text: Feature Name if value is significant
+                val = row[cat]
+                # Lower threshold to show more text, and prefer full name
+                if val > 0.05:
+                    text_for_feature[cat].append(cat)
+                else:
+                    text_for_feature[cat].append("")
+
+        for cat in categories:
+            fig.add_trace(go.Bar(
+                name=cat,
+                x=df_plot['genre'],
+                y=df_plot[cat],
+                marker_color=colors_for_feature[cat],
+                marker_line=dict(width=1, color='rgba(255, 255, 255, 0.5)'), # White outline to separate stack
+                text=text_for_feature[cat],
+                textposition='inside', # Force inside to avoid clutter
+                insidetextfont=dict(color='white', size=10), 
+                hovertemplate=f"<b>%{{x}}</b><br>{cat}: %{{y:.2f}}<extra></extra>"
+            ))
+            
+        barmode = 'stack'
+        show_legend = False # Colors mean Genre, not feature. Legend would be redundant with x-axis.
+        
+    else:
+        # Simple Bar Chart (Total Change)
+        # Colored by Genre to match context
+        colors = [GENRE_COLOR_MAP.get(g, '#ffffff') for g in df_plot['genre']]
+        
+        fig.add_trace(go.Bar(
+            x=df_plot['genre'],
+            y=df_plot['total_change'],
+            marker_color=colors,
+            text=df_plot['total_change'].apply(lambda x: f"{x:.2f}"),
+            textposition='auto',
+            hovertemplate="<b>%{x}</b><br>Total Change: %{y:.2f}<extra></extra>"
+        ))
+        
+        barmode = 'group'
+        show_legend = False
     
     fig.update_layout(
-         title=dict(text=f"Total Feature Change vs {prev_decade}", font=dict(color="white", size=11)),
+         barmode=barmode,
+         title=dict(text=f"Feature Change vs {prev_decade}", font=dict(color="white", size=11)),
          paper_bgcolor="rgba(0,0,0,0)", 
          plot_bgcolor="rgba(0,0,0,0)",
          font=dict(color="white"),
          xaxis=dict(
              showgrid=False, 
-             showticklabels=True, # Show genre names
+             showticklabels=True, 
              tickfont=dict(size=9, color='white'),
              title=None
          ),
@@ -198,7 +263,16 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None):
              tickfont=dict(size=9, color='white'),
              title=None
          ),
-         showlegend=False, 
+         showlegend=show_legend,
+         legend=dict(
+             orientation="h",
+             yanchor="bottom",
+             y=1.02,
+             xanchor="right",
+             x=1,
+             font=dict(size=8),
+             bgcolor="rgba(0,0,0,0)"
+         ),
          margin=dict(l=30, r=10, t=30, b=20),
          autosize=True
     )
@@ -314,8 +388,18 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                          
                          # Bottom 33% - Genre Trends Overlay
                          html.Div(
-                            style={"flex": "1", "minHeight": "0", "borderTop": "1px solid rgba(255,255,255,0.1)", "marginTop": "10px"},
+                            style={"flex": "1", "minHeight": "0", "borderTop": "1px solid rgba(255,255,255,0.1)", "marginTop": "10px", "position": "relative"},
                             children=[
+                                 # Checkbox for Breakdown
+                                html.Div(
+                                    dcc.Checklist(
+                                        id='breakdown-checkbox',
+                                        options=[{'label': ' Show Feature Breakdown', 'value': 'show'}],
+                                        value=[],
+                                        style={"color": "#E0E0E0", "fontSize": "0.8em"}
+                                    ),
+                                    style={"position": "absolute", "top": "5px", "right": "10px", "zIndex": "10"}
+                                ),
                                 dcc.Graph(
                                     id='rate-of-change-barplot',
                                     figure=draw_rate_of_change_barplot(current_decade, selected_genres),
@@ -365,21 +449,11 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                 "gap": "10px"
             },
             children=[
-                 # Top Section: Genre Trends (40%)
+                 # Top Section: Changes & Card (50%)
                  html.Div(
-                     dcc.Graph(
-                         figure=draw_genre_trends(current_decade), 
-                         config={'responsive': True, 'displayModeBar': False},
-                         style={"height": "100%", "width": "100%"}
-                     ),
-                     style={"flex": "4", "minHeight": "0", "width": "100%"}
-                 ),
-                 
-                 # Bottom Section: Changes & Card (60%)
-                 html.Div(
-                     style={"display": "flex", "flexDirection": "row", "gap": "20px", "flex": "6", "minHeight": "0", "width": "100%"},
+                     style={"display": "flex", "flexDirection": "row", "gap": "20px", "flex": "1", "minHeight": "0", "width": "100%"},
                      children=[
-                         # Left: Asc/Desc Changes (Two graphs stacked)
+                         # Left: Biggest Changes (Asc/Desc Changes)
                          html.Div(
                             children=[
                                 html.Div(
@@ -404,9 +478,19 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                          # Right: Decade Card
                          html.Div(
                              create_decade_card(current_decade),
-                             style={"flex": "1", "overflowY": "auto"}
+                             style={"flex": "1", "overflow": "hidden"}
                          )
                      ]
+                 ),
+                 
+                 # Bottom Section: Genre Trends (50%)
+                 html.Div(
+                     dcc.Graph(
+                         figure=draw_genre_trends(current_decade), 
+                         config={'responsive': True, 'displayModeBar': False},
+                         style={"height": "100%", "width": "100%"}
+                     ),
+                     style={"flex": "1", "minHeight": "0", "width": "100%"}
                  )
             ]
         )
@@ -902,36 +986,69 @@ def create_decade_card(decade):
         'fontFamily': "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         'backgroundColor': 'rgba(30, 30, 40, 0.7)',
         'border': '1px solid rgba(255,255,255,0.1)',
-        'maxWidth': '100%', 
+        'width': '100%', 
         'height': '100%', 
         'display': 'flex', 
-        'flexDirection': 'column'
+        'flexDirection': 'column',
+        'boxSizing': 'border-box'
     }, children=[
+        # Top color accent
         html.Div(style={
             'backgroundColor': color,
             'height': '6px',
             'width': '100%',
             'flexShrink': 0
         }),
-        html.Div(style={'padding': '25px', 'overflowY': 'auto', 'flex': '1'}, children=[
-            html.H2(f"The {decade}", style={
-                'marginTop': '0', 
-                'borderBottom': f'2px solid {color}',
-                'paddingBottom': '10px',
-                'color': 'white'
-            }),
-            html.P(text, style={'fontSize': '1.2em', 'lineHeight': '1.5', 'color': '#eee'}),
+        # Content Row
+        html.Div(style={
+            'display': 'flex',
+            'flexDirection': 'row',
+            'flex': '1',
+            'minHeight': '0', # Allows child to shrink below content size if needed
+            'padding': '15px',
+            'gap': '15px'
+        }, children=[
+            # Left: Text Content
             html.Div(style={
-                'marginTop': '20px',
+                'flex': '3', # Give text more space
+                'display': 'flex',
+                'flexDirection': 'column',
+                'justifyContent': 'flex-start',
+                'overflow': 'hidden', # Prevent expansion
+            }, children=[
+                html.H2(f"The {decade}", style={
+                    'marginTop': '0', 
+                    'marginBottom': '10px',
+                    'borderBottom': f'2px solid {color}',
+                    'paddingBottom': '5px',
+                    'color': 'white',
+                    'fontSize': '1.8em',
+                    'whiteSpace': 'nowrap'
+                }),
+                html.P(text, style={
+                    'fontSize': '1.1em', 
+                    'lineHeight': '1.4', 
+                    'color': '#eee',
+                    'margin': '0'
+                })
+            ]),
+            
+            # Right: Image
+            html.Div(style={
+                'flex': '2',
                 'display': 'flex',
                 'justifyContent': 'center',
+                'alignItems': 'center',
+                'height': '100%',
+                'overflow': 'hidden'
             }, children=[
                 html.Img(
-                    src=f'assets/imgs/{decade}.jpg',
+                    src=f'assets/imgs/artists/{decade}.jpg',
                     style={
                         'maxWidth': '100%',
-                        'maxHeight': '250px',
-                        'objectFit': 'contain'
+                        'maxHeight': '100%',
+                        'objectFit': 'contain',
+                        'borderRadius': '6px'
                     }
                 )
             ])

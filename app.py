@@ -8,13 +8,7 @@ import subprocess
 import sys
 
 #Get the correct data run preprocessing
-<<<<<<< HEAD
 subprocess.run([sys.executable, "preprocess.py"])   
-
-
-=======
-subprocess.run(["python", "preprocess.py"])
->>>>>>> 49e0756346645e4c2729f6afbe390734f21c0fca
  
 # This function arranges the plots in an html layout
 def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months", selected_genres=None):
@@ -295,9 +289,12 @@ def save_selected_genres(genres):
     Output("analysis1-area", "figure"),
     Output("rate-of-change-barplot", "figure"),
     Input("genre-dropdown", "value"),
+    Input("breakdown-checkbox", "value"),
     State("sidebar_tabs", "value"),
 )
-def update_analysis1(selected_genres, current_decade):
+def update_analysis1(selected_genres, breakdown_value, current_decade):
+    show_breakdown = bool(breakdown_value and 'show' in breakdown_value)
+    
     bin_size = "1 year" # Fixed bin size
     # Only use the current decade, not accumulated decades
     decades_list = [current_decade]
@@ -415,7 +412,7 @@ def update_analysis1(selected_genres, current_decade):
         selected_genres=selected_genres
     )
     
-    barplot_fig = draw_rate_of_change_barplot(current_decade, selected_genres)
+    barplot_fig = draw_rate_of_change_barplot(current_decade, selected_genres, show_breakdown=show_breakdown)
     
     return spider_graphs_children, area_fig, barplot_fig
 
