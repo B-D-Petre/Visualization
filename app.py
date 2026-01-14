@@ -5,10 +5,10 @@ import webbrowser
 from figures import *
 import plotly.express as px
 import subprocess
-
+import sys
 
 #Get the correct data run preprocessing
-subprocess.run(["python", "preprocess.py"])   
+subprocess.run([sys.executable, "preprocess.py"])   
 
 
  
@@ -289,6 +289,7 @@ def save_selected_genres(genres):
 @app.callback(
     Output("spider-graphs-container", "children"),
     Output("analysis1-area", "figure"),
+    Output("rate-of-change-barplot", "figure"),
     Input("genre-dropdown", "value"),
     State("sidebar_tabs", "value"),
 )
@@ -405,11 +406,14 @@ def update_analysis1(selected_genres, current_decade):
     area_fig = draw_area_plots(
         decades_list, 
         current_decade, 
-        features=["Energy", "Tempo", "Danceability", "Loudness", "Liveness", "Valence", "Speechiness", "Acousticness", "Instrumentalness"],
+        features=["Energy", "Danceability", "Loudness", "Acousticness", "Valence", "Duration", "Liveness"],
         bin_size=bin_size,
         selected_genres=selected_genres
     )
-    return spider_graphs_children, area_fig
+    
+    barplot_fig = draw_rate_of_change_barplot(current_decade, selected_genres)
+    
+    return spider_graphs_children, area_fig, barplot_fig
 
 # Callback to handle click interactions from spider graphs
 @app.callback(
@@ -525,7 +529,8 @@ def update_bin_size(value):
     State('selected_decades', 'data')
 )
 def update_area_opacity(bin_size, decade, selected_decades):
-    figure = draw_area_plots(selected_decades, decade, features=["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness", "Loudness", "Tempo", "Liveness"], bin_size=bin_size)
+    # Updated features list: Duration, Loudness, Valence replace Tempo, Speechiness, Instrumentalness
+    figure = draw_area_plots(selected_decades, decade, features=["Energy", "Danceability", "Loudness", "Acousticness", "Valence", "Duration", "Liveness"], bin_size=bin_size)
     return figure
 
 # Callback for Analysis 1 Legend Toggle
