@@ -27,12 +27,13 @@ def validate():
     ]
     
     for track in check_tracks:
+        # FIX: Check inside 'track_name', NOT 'track_id'
         matches = df[df['track_name'].str.contains(track, case=False, regex=False, na=False)]
+        
         if not matches.empty:
             print(f"\nTrack: {track}")
-            # Show relevant columns
-            cols = ['track_name', 'track_artist', 'decade', 'year', 'track_album_release_date']
-            # safely select only existing columns
+            # FIX: Include track_name in the columns to show
+            cols = ['track_name', 'track_id', 'track_artist', 'decade', 'year', 'track_album_release_date']
             cols = [c for c in cols if c in df.columns]
             print(matches[cols].to_string(index=False))
         else:
@@ -68,16 +69,16 @@ def validate():
                 f.write(f"[Showing up to 20 CORRECTED re-releases first]\n")
                 code_samples = corrected.head(20)
                 for _, row in code_samples.iterrows():
-                     f.write(f"{row['year']:<6} | {str(row['track_album_release_date'])[:10]:<12} | {str(row['track_artist'])[:20]:<20} | {row['track_name']}\n")
+                     f.write(f"{row['year']:<6} | {str(row['track_album_release_date'])[:10]:<12} | {str(row['track_artist'])[:20]:<20} | {row['track_id']}\n")
                 
                 f.write(f"\n[Sample of up to 20 normal tracks]\n")
                 normal_samples = others.head(20)
                 for _, row in normal_samples.iterrows():
-                     f.write(f"{row['year']:<6} | {str(row['track_album_release_date'])[:10]:<12} | {str(row['track_artist'])[:20]:<20} | {row['track_name']}\n")
+                     f.write(f"{row['year']:<6} | {str(row['track_album_release_date'])[:10]:<12} | {str(row['track_artist'])[:20]:<20} | {row['track_id']}\n")
             else:
                 samples = dec_df.sort_values('year').head(40)
                 for _, row in samples.iterrows():
-                     f.write(f"{row['year']:<6} | {'N/A':<12} | {str(row['track_artist'])[:20]:<20} | {row['track_name']}\n")
+                     f.write(f"{row['year']:<6} | {'N/A':<12} | {str(row['track_artist'])[:20]:<20} | {row['track_id']}\n")
 
     print(f"\nDetailed validation list saved to: {output_path}")
 

@@ -65,8 +65,8 @@ def draw_spider_comparison(decade, song1_id, song2_id, show_genre1=False, show_g
     vals1 = _get_vals(s1_row)
     vals2 = _get_vals(s2_row)
     
-    name1 = s1_row['track_name'].values[0]
-    name2 = s2_row['track_name'].values[0]
+    name1 = s1_row['track_id'].values[0]
+    name2 = s2_row['track_id'].values[0]
     genre1 = s1_row['playlist_genre'].values[0] if 'playlist_genre' in s1_row.columns else "?"
     genre2 = s2_row['playlist_genre'].values[0] if 'playlist_genre' in s2_row.columns else "?"
 

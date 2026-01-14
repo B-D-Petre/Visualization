@@ -69,9 +69,9 @@ class DataLoader:
         if self._spider_data.empty: return []
         
         filtered_data = self._spider_data[self._spider_data['decade'] == decade]
-        songs = filtered_data[["track_name", "track_id"]].drop_duplicates().sort_values("track_name")
+        songs = filtered_data[["track_id", "track_id"]].drop_duplicates().sort_values("track_id")
         
-        return [{"label": row["track_name"], "value": row["track_id"]} for _, row in songs.iterrows()]
+        return [{"label": row["track_id"], "value": row["track_id"]} for _, row in songs.iterrows()]
 
 # Global Instance
 data_loader = DataLoader()

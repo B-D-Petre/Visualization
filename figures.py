@@ -862,8 +862,9 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
 
 def get_songs_for_decade(sidebar_tab):
     #Get unique song names and IDs for a given decade
-    filtered_data = spider_data[spider_data['decade'] == sidebar_tab]
-    # 2. Use .values.tolist() to convert the DataFrame into a list of [name, id] pairs
+    filtered_data = spider_data[spider_data['decade'] == sidebar_tab].copy()
+    filtered_data["track_id"] = filtered_data["track_id"].str.split(":").str[-1]
+    # (Assuming your column is named 'track_id')
     songs = filtered_data[["track_name", "track_id"]].drop_duplicates().values.tolist()
     
     return sorted(songs)

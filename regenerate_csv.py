@@ -48,10 +48,10 @@ main_data['decade'] = main_data['year'].apply(_compute_decade).astype('Int64')
 # ----------------------------
 
 # Define features
-raw_features = ["energy", "danceability", "valence", "acousticness", "instrumentalness"]
+raw_features = ["energy", "danceability", "valence", "acousticness", "instrumentalness"] #I think this is where we add another feature later
 
 # Create subset
-metadata_cols = ['track_name', 'track_artist', 'decade', 'track_name', 'year', 'track_album_release_date', 'playlist_genre']
+metadata_cols = ['track_name', 'track_artist', 'decade', 'track_id', 'year', 'track_album_release_date', 'playlist_genre']
 df_spider = main_data[metadata_cols + raw_features].copy()
 
 # Normalize

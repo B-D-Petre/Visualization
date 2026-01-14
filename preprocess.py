@@ -1,8 +1,16 @@
 import subprocess
 import sys
+import pandas as pd
+
+#Fix genres in csv
+main_data = pd.read_csv("assets/main_data_kaggle.csv")
+main_data['playlist_genre'] = main_data['playlist_genre'].str.split(',').str[0]
+main_data.to_csv("assets/main_data_kaggle.csv", index=False)
+main_data.rename(columns={'uri': 'track_id'}, inplace=True)
+
 
 # List of your scripts
-scripts_to_run = ["regenerate_csv.py", "generate_genre_year_data.py", "validate_data.py", "test_timeline.py"]
+scripts_to_run = ["regenerate_csv.py", "generate_genre_year_data.py", "test_timeline.py"] #"validate_data.py",
 
 for script in scripts_to_run:
     print(f"--- Running {script} ---")
@@ -16,8 +24,3 @@ for script in scripts_to_run:
         print(f"Error occurred while running {script}: {e}")
         # Optional: break the loop if one fails
         break
-
-
-main_data = pd.read_csv("assets/spider_graph_data.csv")
-genre = main_data["playlist_genres"]
-genre = genre.split(", ")
