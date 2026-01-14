@@ -400,6 +400,7 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
          autosize=True
     )
              
+
     return fig
 
 # Update the signature to accept optional song arguments
@@ -933,7 +934,10 @@ def draw_timeline(decade, bin_size="5 months"):
 
 # Updated draw_spider to use actual data
 def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfpdLNL5REhtJ", show_genre1=False, show_genre2=False):
-    categories = ["Energy", "Danceability", "Valence", "Acousticness", "Instrumentalness"]
+    # Updated Categories to match Analysis 1
+    categories = ["Energy", "Danceability", "Loudness", "Acousticness", "Valence", "Duration"]
+    category_labels = [c[0] if c != "Duration" else "Dur" for c in categories]
+
     filtered_data = spider_data[spider_data['decade'] == sidebar_tab]
 
     # Use default values if None (but defaults might not exist in new data!)
@@ -957,32 +961,39 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
     song1_values = song1_row[categories].values.flatten().tolist()
     song1_name = song1_row["track_name"].values.flatten().item()
     song1_genre = song1_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song1_row.columns else "Unknown"
+    song1_values = [float(x) for x in song1_values]
     
     song2_values = song2_row[categories].values.flatten().tolist()
     song2_name = song2_row["track_name"].values.flatten().item()
     song2_genre = song2_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song2_row.columns else "Unknown"
+    song2_values = [float(x) for x in song2_values]
 
     # Close the loops
     song1_values.append(song1_values[0])
     song2_values.append(song2_values[0])
-    categories_closed = categories + [categories[0]]
+    categories_closed = categories + [categories[0]] # For logic if needed
+    labels_closed = category_labels + [category_labels[0]] # For display
 
     fig = go.Figure()
 
     fig.add_trace(go.Scatterpolar(
         r=song1_values,
-        theta=categories_closed,
+        theta=labels_closed,
         fill='toself',
-        name=f"{song1_name} ({song1_genre})",
-        line_color='#636EFA'
+        name=f"{song1_name}",
+        line_color='#636EFA',
+        hoverinfo='text',
+        hovertext=[f"{c}: {v:.2f}" for c, v in zip(categories_closed, song1_values)]
     ))
 
     fig.add_trace(go.Scatterpolar(
         r=song2_values,
-        theta=categories_closed,
+        theta=labels_closed,
         fill='toself',
-        name=f"{song2_name} ({song2_genre})",
-        line_color='#EF553B' 
+        name=f"{song2_name}",
+        line_color='#EF553B',
+        hoverinfo='text',
+        hovertext=[f"{c}: {v:.2f}" for c, v in zip(categories_closed, song2_values)]
     ))
     
     if show_genre1:
@@ -992,10 +1003,12 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
             genre1_avg.append(genre1_avg[0]) # Close loop
             fig.add_trace(go.Scatterpolar(
                 r=genre1_avg,
-                theta=categories_closed,
-                name=f"Avg {song1_genre} ({sidebar_tab})",
+                theta=labels_closed,
+                name=f"Avg {song1_genre.title()}",
                 line=dict(dash='dash', color='#636EFA'), 
-                fill=None
+                fill=None,
+                hoverinfo='text',
+                hovertext=[f"Avg {song1_genre.title()}: {v:.2f}" for v in genre1_avg]
             ))
             
     if show_genre2:
@@ -1003,13 +1016,17 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
         if not genre2_data.empty:
             genre2_avg = genre2_data[categories].mean().tolist()
             genre2_avg.append(genre2_avg[0]) # Close loop
-            fig.add_trace(go.Scatterpolar(
-                r=genre2_avg,
-                theta=categories_closed,
-                name=f"Avg {song2_genre} ({sidebar_tab})",
-                line=dict(dash='dash', color='#EF553B'),
-                fill=None
-            ))
+            # Avoid duplicate trace if same genre and showing both
+            if not (show_genre1 and song1_genre == song2_genre):
+                fig.add_trace(go.Scatterpolar(
+                    r=genre2_avg,
+                    theta=labels_closed,
+                    name=f"Avg {song2_genre.title()}",
+                    line=dict(dash='dash', color='#EF553B'),
+                    fill=None,
+                    hoverinfo='text',
+                    hovertext=[f"Avg {song2_genre.title()}: {v:.2f}" for v in genre2_avg]
+                ))
 
     fig.update_layout(
         polar=dict(
@@ -1025,7 +1042,7 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
                 rotation=90, 
                 direction="clockwise",
                 showticklabels=True,
-                tickfont=dict(color="#E0E0E0", size=12, family="Arial Black"), 
+                tickfont=dict(color="#E0E0E0", size=14, family="Arial Black"), 
                 gridcolor="rgba(255, 255, 255, 0.2)", 
                 linecolor="rgba(255, 255, 255, 0.2)"
             )
@@ -1034,7 +1051,7 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
         title=dict(
             text=f"Comparison: {song1_name} vs {song2_name}", 
             font=dict(color="white", size=14),
-            y=0.98, # Pin title to top
+            y=0.98, 
             x=0.5,
             xanchor='center',
             yanchor='top'
@@ -1043,15 +1060,14 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(color="white"),
         autosize=True,
-        # Increased margins further to "zoom out"
-        margin=dict(l=110, r=110, t=100, b=120), 
+        margin=dict(l=80, r=80, t=100, b=100), 
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.1,    # Move legend below the graph
+            y=-0.1,    
             xanchor="center",
             x=0.5,
-            font=dict(color="white", size=10)
+            font=dict(color="white", size=11)
         )
     )
 
