@@ -6,31 +6,39 @@ from figures import *
 import plotly.express as px
 import subprocess
 import sys
+import json
 
 #Get the correct data run preprocessing
 subprocess.run([sys.executable, "preprocess.py"])   
- 
+
+
+#--------------------------------------------------------------------------#
+# Main function to actually draw shit
 # This function arranges the plots in an html layout
+# change layout to whatever makes sense for your tab
 def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size="5 months", selected_genres=None):
+    #----------------------------------------------------------------------------#
+    # Topic 1
     if topbar_tab == "topic-1":
         content = draw_figure(topbar_tab, decades_list, current_decade, selected_genres=selected_genres)
         pane = html.Div(
             style={
                 "height": "100%", "width": "100%",
                 "display": "flex"
-                # Removed background image logic
             },
             children=[content]
         )
+    #----------------------------------------------------------------------------#
+    # Topic 3 listeing/comparing tab
     elif topbar_tab == "topic-3":
-        if layout == "grid":
+        if layout == "grid": 
             # Get available songs for the selected decade
             available_songs = get_songs_for_decade(current_decade)
             song_options = [{"label": song_name, "value": track_id} for song_name, track_id in available_songs]
             
             pane = html.Div(
                 style={
-                    "padding": "30px 30px 20px 30px", # Reduced bottom padding for tighter decade bar fit
+                    "padding": "30px 30px 20px 30px",
                     "display": "flex",
                     "flexDirection": "row",
                     "gap": "20px",
@@ -159,7 +167,8 @@ def draw_pane(topbar_tab, decades_list, current_decade, layout="grid", bin_size=
 
 
 
-
+#---------------------------------------------------------------------------#
+# Actual HTML Layout
 
 # Initialize the app
 app = Dash(__name__, suppress_callback_exceptions=True) #carefull for debugging we might need to remove this later
@@ -200,14 +209,14 @@ app.layout = html.Div(id = "root_container", children=[
 
     # Horizontal Pane
     html.Div(children = [
-        # Main content area (Now full width)
+        # Main content area
         html.Div(id="content_area", children = "Loading...", style={"flex" : "1", "position": "relative", "overflow": "hidden", "height": "100%"}), # Added height 100%
     ],
     #Options
     style={"display" : "flex", "flexDirection" : "column", "flex" : "1", "minHeight": "0", "overflow": "hidden", "position": "relative"} 
     ),
 
-    # Top-Level Bottom bar (Formerly Floating Decades Menu)
+    # Decade selection (Bottom Bar)
     html.Div(children = [
         dcc.Tabs(id="sidebar_tabs", vertical=False, value="20s", 
             parent_style={"flexDirection": "row", "justifyContent": "center"}, # Center tabs
@@ -224,15 +233,15 @@ app.layout = html.Div(id = "root_container", children=[
     ], 
     style={
         "width": "100%", 
-        "padding": "20px",  # Increased padding (30% bigger feel)
-        "background": "rgba(20, 22, 35, 0.95)", # Matched to top bar
+        "padding": "20px",  
+        "background": "rgba(20, 22, 35, 0.95)",
         "borderTop": "1px solid rgba(255,255,255,0.1)",
         "boxShadow": "0 -4px 15px rgba(0,0,0,0.3)",
         "display": "flex",
         "justifyContent": "center",
         "zIndex": "1000",
         "flexShrink": 0,
-        "fontSize": "1.5em" # Increased font size
+        "fontSize": "1.5em"
     })
 ]
 #Options
@@ -249,6 +258,8 @@ app.layout = html.Div(id = "root_container", children=[
     Output(component_id="animation_trigger", component_property="data"),
     Input(component_id="topbar_tabs", component_property="value"),
     Input(component_id="sidebar_tabs", component_property="value"),
+    #States are pseudo callbacks does not run the callback but instead only provides the data
+    #THIS FASTER
     State(component_id="selected_decades", component_property="data"),
     State(component_id="bin_size", component_property="data"),
     State(component_id="previous_decade", component_property="data"),
@@ -258,10 +269,10 @@ app.layout = html.Div(id = "root_container", children=[
 )
 
 # The order of the parameters is always the same as the order of the Inputs
-# just keep that in mind if you add more Inputs
+# just keep that in mind if we add more Inputs
 def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_size, previous_decade, animation_trigger, selected_genres):
+    
     # This function takes the Input value as an argument
-
     selected_decades = selected_decades or []
     if sidebar_tab_value not in selected_decades:
         selected_decades.append(sidebar_tab_value)
@@ -271,7 +282,7 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_si
     if decade_changed:
         animation_trigger = (animation_trigger or 0) + 1
 
-    # Fixed background for all tabs
+
     root_style = {
         "display" : "flex", 
         "flexDirection" : "column", 
@@ -279,10 +290,10 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_si
         "width" : "100vw",
         "backgroundColor": "#01191e"
     }
-    
+
     return draw_pane(topbar_tab_value, selected_decades, sidebar_tab_value, bin_size=bin_size, selected_genres=selected_genres), root_style, selected_decades, sidebar_tab_value, animation_trigger
 
-# Callback to persist selected genres
+# Callback to remember selected genres
 @app.callback(
     Output("selected_genres_store", "data"),
     Input("genre-dropdown", "value"),
@@ -291,7 +302,7 @@ def render_content(topbar_tab_value, sidebar_tab_value, selected_decades, bin_si
 def save_selected_genres(genres):
     return genres
 
-# Callback for Analysis 1 Genre Filtering
+# Callback for genre selector in tab 1. Spider graph and feature line plots
 @app.callback(
     Output("spider-graphs-container", "children"),
     Output("analysis1-area", "figure"),
@@ -300,10 +311,15 @@ def save_selected_genres(genres):
     Input("breakdown-checkbox", "value"),
     State("sidebar_tabs", "value"),
 )
+
+
 def update_analysis1(selected_genres, breakdown_value, current_decade):
     show_breakdown = bool(breakdown_value and 'show' in breakdown_value)
     
-    bin_size = "1 year" # Fixed bin size
+    #not really used anymore but cba
+    bin_size = "1 year"# Need this to display level of aggregation in line plots
+    
+    
     # Only use the current decade, not accumulated decades
     decades_list = [current_decade]
     
@@ -311,16 +327,16 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
     spider_graphs_children = []
     
     if selected_genres:
-        # --- Dynamic Scaling Logic ---
+        
         num_genres = len(selected_genres)
         
-        # Base values from CSS
+        
         base_w = 260
         base_h = 280
         base_m_vert = -20
         base_m_horz = -5
         
-        # Calculate scale factor
+        # change spider scale based on number of genres / amount of plots we need to draw so everything fits
         scale = 1.0
         if num_genres > 15:
             scale = 0.55
@@ -328,32 +344,31 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
             scale = 0.65
         elif num_genres > 4:
             scale = 0.8
-            
-        # Apply scale
+
         s_w = int(base_w * scale)
         s_h = int(base_h * scale)
         s_m_v = int(base_m_vert * scale)
         s_m_h = int(base_m_horz * scale)
-        s_font = max(6, int(14 * scale)) # Minimum font size 6
+        s_font = max(6, int(14 * scale))
         
-        # Alternating background colors (lighter tones of the dark theme)
+
+        # switch background colours between graphs - better readablility
         bg_colors = [
-            "rgba(60, 65, 90, 0.7)",  # Tone A
-            "rgba(75, 80, 105, 0.7)"   # Tone B
+            "rgba(60, 65, 90, 0.7)",
+            "rgba(75, 80, 105, 0.7)"
         ]
         
-        # Logic to insert breaks for 3-2-3-2 pattern
+        # insert breaks for 3-2-3-2 pattern
         current_row_len = 0
         target_row_len = 3 # Start with 3 items in first row
         
-        # Color cycle to match area plots
-        # (Using global GENRE_COLOR_MAP for consistency)
-        
+
+        # Make colour rotation for plots        
         for i, genre in enumerate(selected_genres):
-            # Calculate alternating background color
+            # alternating background color
             bg_color = bg_colors[i % len(bg_colors)]
             
-            # Select line color matching the area plot
+
             line_color = GENRE_COLOR_MAP.get(genre, '#888888')
             
             cell_style_override = {
@@ -367,7 +382,6 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
             # We reuse draw_spider_analysis1 but pass only [genre] to filter, and pass the color
             fig = draw_spider_analysis1(decades_list, current_decade, selected_genres=[genre], override_color=line_color)
             
-            # Customize layout for the grid item
             fig.update_layout(
                 # title=dict(text=f"{genre.title()}", font=dict(size=s_font, color=line_color), y=0.95), 
                 margin=dict(l=20*scale, r=20*scale, t=25*scale, b=25*scale),
@@ -382,7 +396,7 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
                     children=[
                         html.Div(f"{genre.title()}", className="honeycomb-title", style={"color": "white"}),
                         dcc.Graph(
-                            id={'type': 'spider-genre', 'index': genre}, # Dynamic ID for pattern matching
+                            id={'type': 'spider-genre', 'index': genre},
                             figure=fig, 
                             config={'displayModeBar': False},
                             style={"height": "100%", "width": "100%"}
@@ -391,14 +405,13 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
                 )
             )
             
-            # Update Stacking Pattern Logic
+            # Stack graphs. 
             current_row_len += 1
             if current_row_len == target_row_len and i < len(selected_genres) - 1:
-                 # Insert Force Break
                  spider_graphs_children.append(
                      html.Div(style={"flexBasis": "100%", "height": "0", "margin": "0", "padding": "0"})
                  )
-                 # Toggle pattern: 3 -> 2 -> 3 -> 2
+                 # pattern: 3 -> 2 -> 3 -> 2
                  target_row_len = 2 if target_row_len == 3 else 3
                  current_row_len = 0
     else:
@@ -424,7 +437,7 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
     
     return spider_graphs_children, area_fig, barplot_fig
 
-# Callback to handle click interactions from spider graphs
+# Callback for making spider graphs clickable
 @app.callback(
     Output("analysis1-area", "figure", allow_duplicate=True),
     Input({'type': 'spider-genre', 'index': ALL}, 'clickData'),
@@ -432,34 +445,31 @@ def update_analysis1(selected_genres, breakdown_value, current_decade):
     prevent_initial_call=True
 )
 def update_area_highlight(click_data_list, current_figure):
-    # Determine which graph triggered the click
-    # Dash pattern matching trigger context
+    # figoure out which graph triggered the click
     ctx = dash.callback_context
     if not ctx.triggered:
         return dash.no_update
     
-    # Check if any click data exists
+    # dont run callback in case no data was cliecked
     if not any(click_data_list):
         return dash.no_update
 
-    # Extract the genre ID from the triggered input
+    # get genre ID
     triggered_prop_id = ctx.triggered[0]['prop_id']
-    import json
+    
     try:
-        # prop_id is like '{"index":"pop","type":"spider-genre"}.clickData'
+        # prop_id looks like '{"index":"pop","type":"spider-genre"}.clickData'
         prop_id_dict = json.loads(triggered_prop_id.split('.')[0])
         clicked_genre = prop_id_dict['index']
         
-        # Optimize using Patch() to update the existing figure client-side
-        # instead of re-calculating and re-sending the entire figure.
+        #Makes it faster will run on client
         patched_figure = Patch()
         
-        # Loop through all traces in the figure
-        # Note: current_figure['data'] is a list of trace objects
+
+        #Highlight the selected genre in line plot
         for i, trace in enumerate(current_figure['data']):
              if 'name' in trace:
-                 # Check if this trace is the one we clicked
-                 # Ensure strict case matching (convert clicked to title case to match trace names)
+                 # Is trace is the one we clicked?
                  if trace['name'] == clicked_genre.title():
                      patched_figure['data'][i]['line']['width'] = 5
                      patched_figure['data'][i]['opacity'] = 1.0
@@ -484,7 +494,7 @@ def update_area_highlight(click_data_list, current_figure):
     State(component_id="sidebar_tabs", component_property="value"),
 )
 def update_spider_graph(song1, song2, show_genre1_list, show_genre2_list, decade):
-    show_genre1 = bool(show_genre1_list) # Checklist returns list ['show'] or []
+    show_genre1 = bool(show_genre1_list)
     show_genre2 = bool(show_genre2_list)
     if song1 and song2:
         figure = draw_spider(decade, song1, song2, show_genre1, show_genre2)
@@ -513,7 +523,7 @@ def update_player_2(track_id):
     # Spotify embed structure: https://open.spotify.com/embed/track/{ID}
     return f"https://open.spotify.com/embed/track/{track_id}"
 
-# Callback for timeline
+# Callback for timeline tab2
 @app.callback(
     Output("timeline-graph", "figure"),
     Input("bin-size-dropdown", "value"),
@@ -522,7 +532,7 @@ def update_player_2(track_id):
 def update_timeline(bin_size, decade):
     return draw_timeline(decade, bin_size)
 
-# Callback for bin size
+# Callback bin size
 @app.callback(
     Output("bin_size", "data"),
     Input("bin-size-dropdown", "value")
@@ -530,19 +540,18 @@ def update_timeline(bin_size, decade):
 def update_bin_size(value):
     return value
 
-# Callback for area plots (sync bin size with timeline dropdown)
+# Callback line plots
 @app.callback(
     Output('area-plots-graph', 'figure'),
-    Input('bin-size-dropdown', 'value'),  # <-- Use bin-size-dropdown directly for binning
+    Input('bin-size-dropdown', 'value'),
     Input('sidebar_tabs', 'value'),
     State('selected_decades', 'data')
 )
 def update_area_opacity(bin_size, decade, selected_decades):
-    # Updated features list: Duration, Loudness, Valence replace Tempo, Speechiness, Instrumentalness
     figure = draw_area_plots(selected_decades, decade, features=["Energy", "Danceability", "Loudness", "Acousticness", "Valence", "Duration", "Liveness"], bin_size=bin_size)
     return figure
 
-# Callback for Analysis 1 Legend Toggle
+# Callback Analysis 1 Legend Toggle
 @app.callback(
     Output("analysis1-legend-content", "style"),
     Input("analysis1-legend-trigger", "n_clicks"),
@@ -566,11 +575,10 @@ def toggle_legend(n_clicks):
             "backgroundColor": "transparent" # Blend in with the container
         }
     else:
-        # Collapsed State: Remove from flow
         return {
             "display": "none"
         }
 
-# Run the app
+
 if __name__ == "__main__":
     app.run(debug=True, port = 8052)
