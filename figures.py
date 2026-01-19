@@ -123,47 +123,6 @@ def draw_genre_trends(decade_center=None):
         else:
             plot_colors[g] = GENRE_COLOR_MAP.get(g, '#ffffff')
 
-    # If we have a dominant genre, we want that trace to be on top? 
-    # Plotly draws in order. We should make sure dominant is plotted last? No, sorting category_orders usually handles legend.
-    # To handle 'click to color again', we rely on Plotly Legend Interaction (which effectively hides/shows).
-    # But user wants 'click to highlight'. Standard legend click = Hide. Double click = Isolate.
-    # To get "Grey -> Color", we would need two traces per genre: One Grey (Visible), One Color (Hidden).
-    # Clicking "Color" in legend would show it ON TOP of Grey.
-    # But that creates a double legend.
-    
-    # Creating a simplified version adhering to "display the most popular genre... in colour and others in grey"
-    # The "click to highlight" is interpreted as standard isolation or visibility toggling, 
-    # OR we can assume interaction is limited without complex callbacks.
-    # However, to allow "restoring" color, we can set the 'greyed' traces to 'legendonly' initially? No, that hides them.
-    
-    # Compromise: We render ALL lines. The dominant is colored. Others are grey.
-    # The user says "clicking them it should be possible to then highlight that genre in colour again".
-    # This might mean clicking the GREY line turns it COLORED. That needs a custom callback.
-    # GIVEN constraints (I can't easily add a new callback to the app structure without seeing main_callbacks fully/messing scope),
-    # I will stick to the visual request first.
-    
-    # Actually, we can do this: define TWO traces for each genre.
-    # 1. The "Background" (Grey). Always Visible (or maybe not?). name=f"{genre} (bg)"? No.
-    # 2. The "Highlight" (Color). Visible=True for Dominant, Visible='legendonly' for others.
-    # When user clicks the legend item (which is 'legendonly' i.e. greyed out in legend), it Becomes Visible and Colored.
-    # But we still need the Grey line to be visible when the Color one is Hidden.
-    # Plotly doesn't support "Alternative" visibility natively.
-    
-    # Let's try: Trace for EVERY genre in COLOUR.
-    # But set visible='legendonly' for all except Dominant.
-    # ADDITIONALLY, add a single "All Others" grey trace? No, each genre has its own curve.
-    
-    # REVISED STRATEGY:
-    # 1. Create a "Background" Grey trace for EVERY genre. (ShowLegend=False)
-    # 2. Create a "Foreground" Colored trace for EVERY genre. 
-    #    - For Dominant: visible=True
-    #    - For Others: visible='legendonly'
-    # Result:
-    # - User sees 1 colored line + many grey lines.
-    # - Legend shows all genres (colored entries). Dominant is active. Others are 'off'.
-    # - If user clicks a legend item (currently off), the colored line appears ON TOP of the grey one.
-    # - If user clicks Dominant (currently on), it turns off (revealing the grey background underneath).
-    
     fig = go.Figure()
     
     for genre in top_genres:
@@ -218,8 +177,6 @@ def draw_genre_trends(decade_center=None):
         if center_year:
              fig.add_vline(x=center_year, line_width=2, line_dash="dash", line_color="white")
              
-    # style_fig(fig) # Custom styling function might overwrite my layout, so I'll skip or ensure it's safe. 
-    # Usually better to rely on manual layout here since we did custom work.
     return fig
 
 def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_breakdown=False):
@@ -250,28 +207,17 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
     prev_data = spider_data[spider_data['decade'] == prev_decade].copy()
 
     if selected_genres:
-        # User selected specific genres
         loop_genres = selected_genres
     else:
-        # If no selection, either show all or show nothing?
-        # The prompt says "as many bars as there are genres selcted in the dropdown menu"
-        # If the dropdown is empty, usually we might show a default or total.
-        # But let's check input. Spider graph usually defaults to one genre if none.
-        # We'll use all genres present in the current decade if none specified, 
-        # OR handle the case where "selected_genres" comes from the dropdown which might be None
         loop_genres = get_genres() 
-        # Intersection with what's actually in data
         loop_genres = [g for g in loop_genres if g in current_data['playlist_genre'].unique()]
 
     change_data = []
     
     for genre in loop_genres:
-        # Filter for genre
         c_g = current_data[current_data['playlist_genre'] == genre]
         p_g = prev_data[prev_data['playlist_genre'] == genre]
 
-        # Ignore genre if it didn't exist in previous decade (based on a minimal threshold)
-        # Using 5 as threshold to avoid misleading "change" from noise
         if len(p_g) < 5:
             continue
 
@@ -281,7 +227,6 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
         c_means = c_g[categories].mean()
         p_means = p_g[categories].mean()
         
-        # Calculate per-feature change
         feature_changes = (c_means - p_means).abs()
         
         row_data = {'genre': genre, 'total_change': feature_changes.sum()}
@@ -298,20 +243,13 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
     fig = go.Figure()
 
     if show_breakdown:
-        # Stacked Bar Chart (Breakdown)
-        # Strategy: Use the genre's color (solid), but separate segments with white outline.
-        # Label: Full Feature Name if segment is large enough.
-        
-        # 1. Pre-calculate colors and texts
         colors_for_feature = {cat: [] for cat in categories}
         text_for_feature = {cat: [] for cat in categories}
 
         for i, row in df_plot.iterrows():
             genre = row['genre']
-            # Strict adherence to GENRE_COLOR_MAP
             base_hex = GENRE_COLOR_MAP.get(genre, '#888888')
             
-            # Convert to RBGA with opacity 0.6
             if base_hex.startswith('#'):
                  base_rgb = pcolors.hex_to_rgb(base_hex)
             elif base_hex.startswith('rgb'):
@@ -322,13 +260,10 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
 
             rgba_str = f'rgba({base_rgb[0]}, {base_rgb[1]}, {base_rgb[2]}, 0.6)'
             
-            # Use same color for all features of this genre
             for cat in categories:
                 colors_for_feature[cat].append(rgba_str)
                 
-                # Text: Feature Name if value is significant
                 val = row[cat]
-                # Lower threshold to show more text, and prefer full name
                 if val > 0.05:
                     text_for_feature[cat].append(cat)
                 else:
@@ -340,19 +275,17 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
                 x=df_plot['genre'],
                 y=df_plot[cat],
                 marker_color=colors_for_feature[cat],
-                marker_line=dict(width=1, color='rgba(255, 255, 255, 0.5)'), # White outline to separate stack
+                marker_line=dict(width=1, color='rgba(255, 255, 255, 0.5)'),
                 text=text_for_feature[cat],
-                textposition='inside', # Force inside to avoid clutter
+                textposition='inside',
                 insidetextfont=dict(color='white', size=10), 
                 hovertemplate=f"<b>%{{x}}</b><br>{cat}: %{{y:.2f}}<extra></extra>"
             ))
             
         barmode = 'stack'
-        show_legend = False # Colors mean Genre, not feature. Legend would be redundant with x-axis.
+        show_legend = False 
         
     else:
-        # Simple Bar Chart (Total Change)
-        # Colored by Genre to match context
         colors = [GENRE_COLOR_MAP.get(g, '#ffffff') for g in df_plot['genre']]
         
         fig.add_trace(go.Bar(
@@ -402,6 +335,63 @@ def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_break
              
 
     return fig
+
+def compute_decade_genre_changes(genre_year_counts):
+    """Compute genre popularity changes per decade from genre_year_counts.csv structure."""
+    if genre_year_counts.empty:
+        return pd.DataFrame(columns=["decade", "playlist_genre", "count", "prev_count", "change"])
+    df = genre_year_counts.copy()
+    # Assign decade
+    def _decade(year):
+        y = int(year)
+        if y < 1960: return '50s'
+        if y < 1970: return '60s'
+        if y < 1980: return '70s'
+        if y < 1990: return '80s'
+        if y < 2000: return '90s'
+        if y < 2010: return '00s'
+        if y < 2020: return '10s'
+        return '20s'
+    df['decade'] = df['year'].apply(_decade)
+    # Aggregate counts per decade/genre
+    decade_counts = df.groupby(['decade', 'playlist_genre'])['count'].sum().reset_index()
+    # Compute previous decade counts
+    ordered_decades = ['50s', '60s', '70s', '80s', '90s', '00s', '10s', '20s']
+    decade_idx = {d: i for i, d in enumerate(ordered_decades)}
+    decade_counts['prev_decade'] = decade_counts['decade'].apply(lambda d: ordered_decades[decade_idx[d]-1] if decade_idx[d] > 0 else None)
+    # Prepare right DataFrame for merge (avoid duplicate column names)
+    prev_counts = decade_counts[['decade', 'playlist_genre', 'count']].rename(
+        columns={'decade': 'prev_decade', 'count': 'prev_count'})
+    # Merge to get prev_count
+    merged = pd.merge(
+        decade_counts,
+        prev_counts,
+        on=['prev_decade', 'playlist_genre'], how='left'
+    )
+    merged['prev_count'] = merged['prev_count'].fillna(0)
+    merged['change'] = merged['count'] - merged['prev_count']
+    return merged[['decade', 'playlist_genre', 'count', 'prev_count', 'change']]
+
+def draw_change(decade, data, direction='desc'):
+    # data is now expected to be genre_year_counts
+    changes_df = compute_decade_genre_changes(data)
+    delta = changes_df[changes_df['decade'] == decade]
+    top5 = delta.sort_values('change', ascending=False).head(5)
+    bottom5 = delta.sort_values('change', ascending=True).head(5)
+    if direction == "desc":
+        fig_change = px.bar(top5, x='playlist_genre',
+                               y = 'change',
+                               title='Biggest changes in genre popularity this decade',
+                               color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
+                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+    else:
+        fig_change = px.bar(bottom5, x='playlist_genre',
+                               y = 'change',
+                               title='Biggest changes in genre popularity this decade',
+                               color=bottom5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
+                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+    style_fig(fig_change)
+    return fig_change
 
 # Update the signature to accept optional song arguments
 def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None, selected_genres=None, show_genre1=False, show_genre2=False):
@@ -582,7 +572,7 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                             children=[
                                 html.Div(
                                     dcc.Graph(
-                                        figure=draw_change(current_decade, genre_counts, "desc"),
+                                        figure=draw_change(current_decade, genre_year_counts, "desc"),
                                         config={'responsive': True, 'displayModeBar': False},
                                         style={"height": "100%", "width": "100%"}
                                     ),
@@ -590,7 +580,7 @@ def draw_figure(topbar_tab, decades_list, current_decade, song1=None, song2=None
                                 ),
                                 html.Div(
                                     dcc.Graph(
-                                        figure=draw_change(current_decade, genre_counts, "asc"),
+                                        figure=draw_change(current_decade, genre_year_counts, "asc"),
                                         config={'responsive': True, 'displayModeBar': False},
                                         style={"height": "100%", "width": "100%"}
                                     ),
@@ -1016,7 +1006,6 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
         if not genre2_data.empty:
             genre2_avg = genre2_data[categories].mean().tolist()
             genre2_avg.append(genre2_avg[0]) # Close loop
-            # Avoid duplicate trace if same genre and showing both
             if not (show_genre1 and song1_genre == song2_genre):
                 fig.add_trace(go.Scatterpolar(
                     r=genre2_avg,
@@ -1076,8 +1065,6 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
 def get_songs_for_decade(sidebar_tab):
     filtered_data = spider_data[spider_data['decade'] == sidebar_tab].copy()
     
-    # We already cleaned track_id globally, so we can just grab it
-    # We return Name (Label) and ID (Value)
     if 'track_name' in filtered_data.columns and 'track_id' in filtered_data.columns:
          songs = filtered_data[["track_name", "track_id"]].drop_duplicates().values.tolist()
     else:
@@ -1086,7 +1073,6 @@ def get_songs_for_decade(sidebar_tab):
     return sorted(songs)
 
 #FILIPS PLOTS
-# ... (Rest of Filip's code remains unchanged)
 PAPER_BG = 'rgba(30, 30, 40, 0.7)'  
 INK_COLOR = 'white'
 FONT_FAMILY = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
@@ -1103,7 +1089,6 @@ def style_fig(fig):
     )
     return fig
 
-# ... (Decade Info/Card code follows)
 DECADE_INFO = {
     '50s': "The 1950s birthed Rock 'n' Roll, shaking up the music world with rebellious energy. Elvis Presley, the King of Rock and Roll, became a global icon with his electrifying performances.",
     '60s': "The 1960s were defined by counterculture and the British Invasion. The Beatles revolutionized popular music with their innovative songwriting and studio experimentation.",
@@ -1114,26 +1099,6 @@ DECADE_INFO = {
     '10s': "The 2010s saw the dominance of streaming and the evolution of country-pop crossovers. Taylor Swift became a global phenomenon, celebrated for her storytelling and genre-spanning reinventions.",
     '20s': "The 2020s are shaped by viral hits and moody, atmospheric pop production. The Weeknd defines the modern sound with his cinematic blend of R&B, pop, and 80s nostalgia."
 }
-
-def draw_change(decade, data, direction='desc'):
-    delta = data[data['decade'] == decade]
-    top5 = delta.sort_values('change', ascending=False).head(5)
-    bottom5 = delta.sort_values('change', ascending=True).head(5)
-    if direction == "desc":
-        fig_change = px.bar(top5, x='playlist_genre',
-                               y = 'change',
-                               title='Biggest changes in genre popularity this decade',
-                               color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
-                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
-    else:
-               fig_change = px.bar(bottom5, x='playlist_genre',
-                                   y = 'change',
-                                   title='Biggest changes in genre popularity this decade',
-                                   color=bottom5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
-                                   color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
-        
-    style_fig(fig_change)
-    return fig_change
 
 DECADE_COLORS = {
     '60s': '#D35400',
@@ -1147,7 +1112,6 @@ DECADE_COLORS = {
 def create_decade_card(decade):
     default_color = DECADE_COLORS.get(decade, '#333')
     
-    # Map decade artist to their primary genre
     artist_genre_map = {
         '50s': 'rock',   # Elvis
         '60s': 'rock',   # Beatles
@@ -1164,11 +1128,8 @@ def create_decade_card(decade):
 
     text = DECADE_INFO.get(decade, "Description unavailable.")
     
-    # Determine image path dynamically
-    img_src = f'assets/imgs/artists/{decade}.jpg' # Fallback
-    # Check common extensions
+    img_src = f'assets/imgs/artists/{decade}.jpg'
     for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']:
-         # Check relative to execution directory
          if os.path.exists(f'assets/imgs/artists/{decade}{ext}'):
              img_src = f'assets/imgs/artists/{decade}{ext}'
              break
@@ -1183,29 +1144,26 @@ def create_decade_card(decade):
         'flexDirection': 'column',
         'boxSizing': 'border-box'
     }, children=[
-        # Top color accent
         html.Div(style={
             'backgroundColor': color,
             'height': '6px',
             'width': '100%',
             'flexShrink': 0
         }),
-        # Content Row
         html.Div(style={
             'display': 'flex',
             'flexDirection': 'row',
             'flex': '1',
-            'minHeight': '0', # Allows child to shrink below content size if needed
+            'minHeight': '0',
             'padding': '15px',
             'gap': '15px'
         }, children=[
-            # Left: Text Content
             html.Div(style={
-                'flex': '3', # Give text more space
+                'flex': '3',
                 'display': 'flex',
                 'flexDirection': 'column',
                 'justifyContent': 'flex-start',
-                'overflow': 'hidden', # Prevent expansion
+                'overflow': 'hidden',
             }, children=[
                 html.H2(f"The {decade}", style={
                     'marginTop': '0', 
@@ -1223,8 +1181,6 @@ def create_decade_card(decade):
                     'margin': '0'
                 })
             ]),
-            
-            # Right: Image
             html.Div(style={
                 'flex': '2',
                 'display': 'flex',
