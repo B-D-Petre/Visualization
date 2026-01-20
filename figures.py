@@ -178,7 +178,7 @@ def draw_genre_trends(decade_center=None):
              fig.add_vline(x=center_year, line_width=2, line_dash="dash", line_color="white")
              
     return fig
-
+# probalby does nothing
 def draw_rate_of_change_barplot(current_decade, selected_genres=None, show_breakdown=False):
     ordered_decades = ['50s', '60s', '70s', '80s', '90s', '00s', '10s', '20s']
     if current_decade not in ordered_decades:
@@ -370,20 +370,24 @@ def compute_decade_genre_changes(genre_year_counts):
     )
     merged['prev_count'] = merged['prev_count'].fillna(0)
     merged['change'] = merged['count'] - merged['prev_count']
+    merged.loc[merged['decade'] == '50s', 'change'] = 0
     return merged[['decade', 'playlist_genre', 'count', 'prev_count', 'change']]
 
+# this is the actual one
 def draw_change(decade, data, direction='desc'):
-    # data is now expected to be genre_year_counts
+    
     changes_df = compute_decade_genre_changes(data)
     delta = changes_df[changes_df['decade'] == decade]
-    top5 = delta.sort_values('change', ascending=False).head(5)
-    bottom5 = delta.sort_values('change', ascending=True).head(5)
+    increasing_genres = delta[delta['change'] > 0]
+    top5 = increasing_genres.sort_values('change', ascending=False).head(5)
+    declining_genres = delta[delta['change'] < 0]
+    bottom5 = declining_genres.sort_values('change', ascending=True).head(5)
     if direction == "desc":
         fig_change = px.bar(top5, x='playlist_genre',
                                y = 'change',
                                title='Biggest changes in genre popularity this decade',
                                color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
-                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+                               color_discrete_map={'positive': "#1BE357", 'negative': '#FA003F'})
     else:
         fig_change = px.bar(bottom5, x='playlist_genre',
                                y = 'change',

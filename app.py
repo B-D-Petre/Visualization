@@ -581,4 +581,4 @@ def toggle_legend(n_clicks):
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port = 8052)
+    app.run(debug=True, port = 8052)
