@@ -193,8 +193,8 @@ app.layout = html.Div(id = "root_container", children=[
         dcc.Tabs(id="topbar_tabs", value="topic-1", 
             parent_style={"flexDirection": "row", "width": "100%"},
             children=[
-            dcc.Tab(label="The Elements", value="topic-1", className="top-tab", selected_className="top-tab--selected"),
-            dcc.Tab(label="The Journey", value="topic-4", className="top-tab", selected_className="top-tab--selected"),
+            dcc.Tab(label="The Music", value="topic-1", className="top-tab", selected_className="top-tab--selected"),
+            dcc.Tab(label="The Charts", value="topic-4", className="top-tab", selected_className="top-tab--selected"),
             dcc.Tab(label="The Spotlight", value="topic-3", className="top-tab", selected_className="top-tab--selected")
         ])
     ], 
@@ -581,4 +581,4 @@ def toggle_legend(n_clicks):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port = 8052)
+    app.run(debug=False, port = 8052)
