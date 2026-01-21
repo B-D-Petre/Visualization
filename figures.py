@@ -373,7 +373,7 @@ def compute_decade_genre_changes(genre_year_counts):
     merged.loc[merged['decade'] == '50s', 'change'] = 0
     return merged[['decade', 'playlist_genre', 'count', 'prev_count', 'change']]
 
-# this is the actual one
+# Filips double barplot change function
 def draw_change(decade, data, direction='desc'):
     
     changes_df = compute_decade_genre_changes(data)
@@ -388,14 +388,18 @@ def draw_change(decade, data, direction='desc'):
                                title='Upcoming Genres',
                                color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
                                color_discrete_map={'positive': "#1BE357", 'negative': '#FA003F'},
-                               labels={'playlist_genre': 'Genre', 'change': 'Change'})
+                               labels={'playlist_genre': 'Genre', 'change': 'Change'},
+                               width = 600 
+                               )
     else:
         fig_change = px.bar(bottom5, x='playlist_genre',
                                y = 'change',
                                title='Genres on Decline',
                                color=bottom5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
                                color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'},
-                               labels={'playlist_genre': 'Genre', 'change': 'Change'})
+                               labels={'playlist_genre': 'Genre', 'change': 'Change'},
+                               width = 600
+                               )
     style_fig(fig_change)
     return fig_change
 
@@ -1090,8 +1094,8 @@ def style_fig(fig):
         font=dict(family=FONT_FAMILY, color=INK_COLOR),
         title_font=dict(size=20, family=FONT_FAMILY),
         margin=dict(t=50, l=20, r=20, b=20),
-        xaxis=dict(gridcolor="rgba(255,255,255,0.1)", zerolinecolor="rgba(255,255,255,0.1)"),
-        yaxis=dict(gridcolor="rgba(255,255,255,0.1)", zerolinecolor="rgba(255,255,255,0.1)")
+        xaxis=dict(gridcolor="rgba(255,255,255,0.1)", zerolinecolor="rgba(255,255,255,0.1)", range =[-0.5, 5 - 0.5], fixedrange = True),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.1)", zerolinecolor="rgba(255,255,255,0.1)"),
     )
     return fig
 
