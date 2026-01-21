@@ -55,7 +55,7 @@ GENRE_COLOR_MAP = {
     'pop': '#00CC96',    # Green
     'hip hop': '#AB63FA', # Purple
     'r&b': '#FFA15A',    # Orange
-    'unknown': '#19D3F3', # Cyan
+    'Other': '#19D3F3', # Cyan
     'country': '#FF6692', # Pink
     'jazz': '#B6E880',   # Light Green
     'rap': '#FF97FF',    # Magenta
@@ -385,15 +385,17 @@ def draw_change(decade, data, direction='desc'):
     if direction == "desc":
         fig_change = px.bar(top5, x='playlist_genre',
                                y = 'change',
-                               title='Biggest changes in genre popularity this decade',
+                               title='Upcoming Genres',
                                color=top5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
-                               color_discrete_map={'positive': "#1BE357", 'negative': '#FA003F'})
+                               color_discrete_map={'positive': "#1BE357", 'negative': '#FA003F'},
+                               labels={'playlist_genre': 'Genre', 'change': 'Change'})
     else:
         fig_change = px.bar(bottom5, x='playlist_genre',
                                y = 'change',
-                               title='Biggest changes in genre popularity this decade',
+                               title='Genres on Decline',
                                color=bottom5['change'].apply(lambda x: 'positive' if x >= 0 else 'negative'),
-                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'})
+                               color_discrete_map={'positive': '#2E8B57', 'negative': '#FA003F'},
+                               labels={'playlist_genre': 'Genre', 'change': 'Change'})
     style_fig(fig_change)
     return fig_change
 
@@ -954,12 +956,12 @@ def draw_spider(sidebar_tab, song1="6dOtVTDdiauQNBQEDOtlAB", song2="1d7Ptw3qYcfp
 
     song1_values = song1_row[categories].values.flatten().tolist()
     song1_name = song1_row["track_name"].values.flatten().item()
-    song1_genre = song1_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song1_row.columns else "Unknown"
+    song1_genre = song1_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song1_row.columns else "Other"
     song1_values = [float(x) for x in song1_values]
     
     song2_values = song2_row[categories].values.flatten().tolist()
     song2_name = song2_row["track_name"].values.flatten().item()
-    song2_genre = song2_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song2_row.columns else "Unknown"
+    song2_genre = song2_row["playlist_genre"].values.flatten().item() if "playlist_genre" in song2_row.columns else "Other"
     song2_values = [float(x) for x in song2_values]
 
     # Close the loops

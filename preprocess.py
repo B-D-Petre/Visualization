@@ -43,7 +43,7 @@ def clean_track_name(name):
 
 def map_genre(genre_string):
     if not isinstance(genre_string, str):
-        return "Unknown"
+        return "Other"
     
     clean_str = genre_string.lower().replace('australian', '')
     

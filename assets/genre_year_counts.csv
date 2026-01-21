@@ -1,8 +1,8 @@
 year,playlist_genre,count
 1955,Rock,1
 1956,Rock,2
+1957,Other,1
 1957,R&B,1
-1957,Unknown,1
 1958,Blues,1
 1958,Pop,1
 1958,R&B,1
@@ -15,6 +15,7 @@ year,playlist_genre,count
 1961,R&B,5
 1961,Rock,6
 1962,Country,1
+1962,Other,1
 1962,R&B,11
 1962,Rock,14
 1963,Blues,2
@@ -28,16 +29,16 @@ year,playlist_genre,count
 1964,Country,2
 1964,Folk,1
 1964,Jazz,1
+1964,Other,1
 1964,Pop,2
 1964,R&B,12
 1964,Rock,29
-
 1965,British invasion,1
 1965,Country,2
+1965,Other,3
 1965,Pop,2
 1965,R&B,5
 1965,Rock,37
-
 1966,Blues,3
 1966,British invasion,3
 1966,Country,2
@@ -51,121 +52,121 @@ year,playlist_genre,count
 1967,Electronic,3
 1967,Hip Hop,1
 1967,Jazz,1
+1967,Other,2
 1967,Pop,7
 1967,R&B,9
 1967,Rock,36
-
 1968,British invasion,1
 1968,Classical,2
 1968,Country,1
 1968,Electronic,5
+1968,Other,2
 1968,Pop,9
 1968,R&B,9
 1968,Rock,41
-
 1969,Country,1
 1969,Electronic,3
+1969,Other,4
 1969,Pop,5
 1969,R&B,7
 1969,Rock,39
-
 1970,Blues,2
 1970,Country,2
 1970,Electronic,3
+1970,Other,5
 1970,Pop,2
 1970,R&B,5
 1970,Rock,54
-
 1971,Country,1
 1971,Electronic,2
+1971,Other,4
 1971,Pop,2
 1971,R&B,7
 1971,Rock,46
-
 1972,British invasion,1
 1972,Electronic,1
 1972,Folk,1
+1972,Other,4
 1972,Pop,6
 1972,R&B,5
 1972,Rock,47
-
 1973,Banjo,1
 1973,Country,1
 1973,Electronic,1
+1973,Other,7
 1973,Pop,5
 1973,R&B,6
 1973,Rock,63
-
 1974,Electronic,2
+1974,Other,6
 1974,Pop,9
 1974,R&B,4
 1974,Rock,52
-
 1975,Country,2
 1975,Electronic,4
+1975,Other,3
 1975,Pop,10
 1975,R&B,6
 1975,Rock,48
-
 1976,Electronic,3
 1976,Jazz,1
+1976,Other,3
 1976,Pop,10
 1976,R&B,8
 1976,Rock,60
 1976,Theme,1
-
 1977,Country,1
 1977,Electronic,5
+1977,Other,7
 1977,Pop,7
 1977,R&B,2
 1977,Reggae,1
 1977,Rock,63
-
 1978,Electronic,20
+1978,Other,3
 1978,Pop,3
 1978,R&B,9
 1978,Reggae,1
 1978,Rock,60
-
 1979,Electronic,22
 1979,Hi-nrg,1
+1979,Other,4
 1979,Pop,3
 1979,R&B,8
 1979,Rock,41
-
 1980,Country,2
 1980,Electronic,13
 1980,Hi-nrg,1
+1980,Other,4
 1980,Pop,4
 1980,R&B,4
 1980,Rock,46
-1980,Unknown,4
 1981,Country,2
 1981,Electronic,17
-1981,Pop,10
+1981,Other,8
+1981,Pop,1
 1981,R&B,5
 1981,Rock,54
-1981,Unknown,8
 1982,Electronic,16
-1982,Hip Hop,28
+1982,Hip Hop,1
+1982,Other,6
 1982,Pop,2
 1982,R&B,7
 1982,Rock,53
 1982,Theme,1
-1982,Unknown,6
 1983,Electronic,22
 1983,Hi-nrg,2
 1983,Jazz,1
+1983,Other,3
 1983,R&B,4
 1983,Reggae,2
 1983,Rock,45
-1983,Unknown,3
 1984,British invasion,1
 1984,Electronic,20
+1984,Other,1
 1984,Pop,1
 1984,R&B,10
 1984,Rock,53
-1984,Unknown,1
 1985,Classical,1
 1985,Electronic,25
 1985,Jazz,1
@@ -173,83 +174,83 @@ year,playlist_genre,count
 1985,R&B,13
 1985,Rock,53
 1986,Electronic,22
-1986,Hip Hop,67
+1986,Hip Hop,6
+1986,Other,7
 1986,R&B,10
 1986,Rock,73
-1986,Unknown,7
 1987,Electronic,18
+1987,Other,9
 1987,Pop,5
 1987,R&B,13
 1987,Rock,93
-1987,Unknown,9
 1988,Country,1
 1988,Electronic,22
 1988,Folk,3
-1988,Hip Hop,15
+1988,Hip Hop,3
 1988,Jazz,1
+1988,Other,6
 1988,Pop,3
 1988,R&B,8
 1988,Rock,80
-1988,Unknown,6
 1989,British invasion,3
 1989,Country,1
 1989,Electronic,23
-1989,Hip Hop,35
+1989,Hip Hop,2
 1989,Jazz,1
 1989,Mellow gold,1
+1989,Other,1
 1989,Pop,3
 1989,R&B,9
 1989,Rock,56
-1989,Unknown,1
 1990,Blues,1
 1990,Electronic,25
 1990,Hip Hop,10
 1990,Indigenous music,1
 1990,Novelty,1
+1990,Other,7
 1990,Pop,3
 1990,R&B,5
 1990,Rock,48
-
 1991,British invasion,2
 1991,Country,1
 1991,Electronic,10
 1991,Hip Hop,8
 1991,Indigenous music,3
 1991,Mellow gold,1
+1991,Other,2
 1991,Pop,3
 1991,R&B,20
 1991,Rock,61
-
 1992,British invasion,1
 1992,Classical,2
 1992,Country,4
 1992,Doo-wop,1
 1992,Electronic,19
 1992,Hip Hop,10
+1992,Other,12
 1992,Pop,7
 1992,R&B,14
 1992,Rock,49
-2
 1993,Blues,1
 1993,British invasion,1
 1993,Electronic,25
 1993,Hip Hop,8
 1993,Jazz,2
+1993,Other,8
 1993,Pop,10
 1993,R&B,9
 1993,Rock,36
 1993,Theme,3
-
 1994,Country,2
 1994,Electronic,17
 1994,Folk,1
 1994,Hip Hop,6
 1994,Nashville sound,1
+1994,Other,4
 1994,Pop,6
 1994,R&B,9
 1994,Reggae,1
 1994,Rock,54
-
 1995,Classical,2
 1995,Country,2
 1995,Electronic,39
@@ -257,37 +258,37 @@ year,playlist_genre,count
 1995,Hip Hop,7
 1995,Jazz,1
 1995,Mellow gold,2
+1995,Other,12
 1995,Pop,7
 1995,R&B,22
 1995,Reggae,1
 1995,Rock,65
-2
 1996,Country,4
 1996,Doo-wop,1
 1996,Electronic,25
 1996,Hip Hop,9
+1996,Other,6
 1996,Pop,11
 1996,R&B,8
 1996,Rock,69
-
 1997,Country,7
 1997,Electronic,44
 1997,Hip Hop,15
 1997,Jazz,1
 1997,Nashville sound,1
+1997,Other,6
 1997,Pop,9
 1997,R&B,13
 1997,Rock,75
-
 1998,Blues,2
 1998,Country,3
 1998,Electronic,38
 1998,Folk,3
 1998,Hip Hop,9
+1998,Other,11
 1998,Pop,15
 1998,R&B,9
 1998,Rock,69
-1
 1999,British invasion,2
 1999,Classical,1
 1999,Country,1
@@ -296,19 +297,19 @@ year,playlist_genre,count
 1999,Hip Hop,12
 1999,Jazz,1
 1999,Latin,6
+1999,Other,7
 1999,Pop,6
 1999,R&B,25
 1999,Rock,52
-
 2000,Country,2
 2000,Electronic,58
 2000,Hip Hop,17
 2000,Jazz,5
 2000,Latin,1
+2000,Other,11
 2000,Pop,15
 2000,R&B,16
 2000,Rock,74
-
 2001,Country,1
 2001,Electronic,60
 2001,Hip Hop,24
@@ -316,22 +317,22 @@ year,playlist_genre,count
 2001,Latin,1
 2001,Nashville sound,1
 2001,Neo mellow,3
+2001,Other,9
 2001,Pop,19
 2001,R&B,16
 2001,Reggae,1
 2001,Rock,78
-2001,Unknown,9
 2002,Blues,1
 2002,Country,3
 2002,Electronic,37
 2002,Hip Hop,44
 2002,Jazz,4
 2002,Latin,1
+2002,Other,9
 2002,Pop,24
 2002,R&B,14
 2002,Reggae,1
 2002,Rock,62
-2002,Unknown,9
 2003,Banjo,2
 2003,Blues,1
 2003,Country,3
@@ -341,30 +342,30 @@ year,playlist_genre,count
 2003,Nashville sound,1
 2003,Neo mellow,1
 2003,Novelty,1
+2003,Other,17
 2003,Pop,21
 2003,R&B,19
 2003,Rock,88
 2003,Talent show,1
-
 2004,Banjo,1
 2004,British invasion,1
 2004,Country,4
 2004,Electronic,50
 2004,Hip Hop,41
+2004,Other,7
 2004,Pop,18
 2004,R&B,13
 2004,Rock,71
-2004,Unknown,7
 2005,Blues,3
 2005,Electronic,65
 2005,Hip Hop,37
 2005,Jazz,2
 2005,Neo mellow,8
+2005,Other,15
 2005,Pop,23
 2005,R&B,17
 2005,Rock,77
 2005,Surf music,2
-
 2006,Blues,2
 2006,British invasion,1
 2006,Classical,1
@@ -375,11 +376,11 @@ year,playlist_genre,count
 2006,Mellow gold,1
 2006,Neo mellow,4
 2006,Novelty,1
+2006,Other,15
 2006,Pop,22
 2006,R&B,19
 2006,Rock,67
 2006,Talent show,1
-
 2007,Banjo,1
 2007,Blues,1
 2007,Country,4
@@ -390,11 +391,11 @@ year,playlist_genre,count
 2007,Hip Hop,30
 2007,Jazz,4
 2007,Neo mellow,1
+2007,Other,12
 2007,Pop,12
 2007,R&B,27
 2007,Reggae,1
 2007,Rock,88
-
 2008,Blues,1
 2008,British invasion,1
 2008,Country,2
@@ -404,12 +405,12 @@ year,playlist_genre,count
 2008,Jazz,1
 2008,Nashville sound,1
 2008,Neo mellow,1
+2008,Other,26
 2008,Pop,53
 2008,R&B,32
 2008,Rock,112
 2008,Surf music,1
 2008,Talent show,1
-
 2009,Blues,1
 2009,British invasion,3
 2009,Country,2
@@ -421,11 +422,11 @@ year,playlist_genre,count
 2009,Nashville sound,3
 2009,Neo mellow,5
 2009,Novelty,1
+2009,Other,15
 2009,Pop,32
 2009,R&B,20
 2009,Rock,113
 2009,Surf music,2
-
 2010,Banjo,2
 2010,Blues,2
 2010,Country,7
@@ -435,11 +436,11 @@ year,playlist_genre,count
 2010,Jazz,3
 2010,Neo mellow,1
 2010,Novelty,2
+2010,Other,23
 2010,Pop,37
 2010,R&B,10
 2010,Rock,78
 2010,Talent show,2
-2010,Unknown,23
 2011,Country,2
 2011,Electronic,94
 2011,Folk,1
@@ -450,11 +451,11 @@ year,playlist_genre,count
 2011,Nashville sound,2
 2011,Neo mellow,1
 2011,Novelty,2
+2011,Other,24
 2011,Pop,44
 2011,R&B,34
 2011,Rock,83
 2011,Talent show,1
-2011,Unknown,24
 2012,Blues,3
 2012,Classical,3
 2012,Country,1
@@ -465,11 +466,11 @@ year,playlist_genre,count
 2012,Jazz,1
 2012,Mellow gold,1
 2012,Novelty,1
+2012,Other,18
 2012,Pop,76
 2012,R&B,26
 2012,Reggae,1
 2012,Rock,52
-2012,Unknown,18
 2013,Blues,2
 2013,British invasion,2
 2013,Country,5
@@ -480,11 +481,11 @@ year,playlist_genre,count
 2013,Latin,1
 2013,Nashville sound,2
 2013,Neo mellow,1
+2013,Other,12
 2013,Pop,57
 2013,R&B,24
 2013,Rock,80
 2013,Talent show,2
-2013,Unknown,12
 2014,Blues,1
 2014,Classical,1
 2014,Country,7
@@ -493,12 +494,12 @@ year,playlist_genre,count
 2014,Hip Hop,41
 2014,Jazz,4
 2014,Neo mellow,1
+2014,Other,19
 2014,Pop,109
 2014,R&B,31
 2014,Rock,62
 2014,Surf music,2
 2014,Talent show,1
-2014,Unknown,19
 2014,World,3
 2015,Blues,1
 2015,British invasion,1
@@ -508,10 +509,10 @@ year,playlist_genre,count
 2015,Hip Hop,45
 2015,Indigenous music,1
 2015,Jazz,5
+2015,Other,30
 2015,Pop,109
 2015,R&B,48
 2015,Rock,58
-2015,Unknown,30
 2016,Aussietronica,1
 2016,Country,5
 2016,Electronic,94
@@ -519,10 +520,10 @@ year,playlist_genre,count
 2016,Hip Hop,59
 2016,Indigenous music,1
 2016,Jazz,12
+2016,Other,18
 2016,Pop,94
 2016,R&B,28
 2016,Rock,40
-2016,Unknown,18
 2017,Aussietronica,3
 2017,Blues,1
 2017,Country,1
@@ -531,12 +532,12 @@ year,playlist_genre,count
 2017,Hip Hop,56
 2017,Nashville sound,1
 2017,Neo mellow,4
+2017,Other,12
 2017,Pop,72
 2017,R&B,27
 2017,Reggae,1
 2017,Rock,66
 2017,Talent show,2
-2017,Unknown,12
 2018,Alt z,1
 2018,British invasion,3
 2018,Country,4
@@ -544,23 +545,23 @@ year,playlist_genre,count
 2018,Folk,4
 2018,Hip Hop,41
 2018,Indigenous music,1
+2018,Other,9
 2018,Pop,65
 2018,R&B,28
 2018,Rock,32
 2018,Talent show,1
-2018,Unknown,9
 2019,British invasion,2
 2019,Country,6
 2019,Electronic,48
 2019,Folk,1
 2019,Hip Hop,30
 2019,Indigenous music,1
+2019,Other,9
 2019,Pop,67
 2019,R&B,14
 2019,Reggae,1
 2019,Rock,27
 2019,Talent show,1
-2019,Unknown,9
 2019,World,1
 2020,Alt z,2
 2020,Aussietronica,1
@@ -570,10 +571,10 @@ year,playlist_genre,count
 2020,Hip Hop,47
 2020,Jazz,1
 2020,Novelty,1
+2020,Other,15
 2020,Pop,74
 2020,R&B,18
 2020,Rock,25
-2020,Unknown,15
 2020,World,3
 2021,Alt z,1
 2021,Aussietronica,1
@@ -582,10 +583,10 @@ year,playlist_genre,count
 2021,Folk,2
 2021,Hip Hop,35
 2021,Indigenous music,1
+2021,Other,38
 2021,Pop,45
 2021,R&B,18
 2021,Rock,14
-2021,Unknown,38
 2021,World,2
 2022,Alt z,3
 2022,Electronic,18
@@ -598,10 +599,10 @@ year,playlist_genre,count
 2023,Country,7
 2023,Electronic,27
 2023,Hip Hop,8
+2023,Other,4
 2023,Pop,15
 2023,R&B,3
 2023,Rock,1
-2023,Unknown,4
 2023,World,2
 2024,Electronic,1
 2024,Hip Hop,2
